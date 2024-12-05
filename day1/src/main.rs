@@ -14,30 +14,14 @@
   It is needed to calculate the similarity score which tis the number of the left column times the times it appears on the right.
   All added together for each element of the left list.
  */
-use std::fs::File;
-use std::io::{self, BufRead};
+mod utils;
 
-fn main() -> io::Result<()> {
-  let file_path = "./src/first_challenge_input.txt";
-
-  let (mut column1,mut column2) = read_file_columns(file_path)?;
-
-  // println!("Locations distance: {:?}", calculate_distance(&mut column1, &mut column2)) ;
-  println!("Similarity score: {:?}", calculate_similarity_score(&column1, &column2)) ;
-
-  Ok(())
-}
-
-// To
-fn read_file_columns(file_path: &str) -> io::Result<(Vec<i32>, Vec<i32>)> {
-  let file = File::open(file_path)?;
-  let reader = io::BufReader::new(file);
-
+fn main() {
   let mut column1: Vec<i32> = Vec::new();
   let mut column2: Vec<i32> = Vec::new();
 
-  for line in reader.lines() {
-    let line = line?;
+  for line in utils::read_puzzle_input("./src/first_challenge_input.txt") {
+    let line = line.expect("Couldn't read input line");
 
     let columns: Vec<&str> = line.split_whitespace().collect();
 
@@ -49,8 +33,8 @@ fn read_file_columns(file_path: &str) -> io::Result<(Vec<i32>, Vec<i32>)> {
       column2.push(col2);
     }
   }
-
-  Ok((column1, column2)) // Return the two columns
+  // println!("Locations distance: {:?}", calculate_distance(&mut column1, &mut column2)) ;
+  println!("Similarity score: {:?}", calculate_similarity_score(&column1, &column2)) ;
 }
 
 fn calculate_distance(column1: &mut Vec<i32>, column2: &mut Vec<i32>) -> i32 {

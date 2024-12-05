@@ -15,19 +15,12 @@
   If removing the bad level makes the report safe, then it is counted as safe.
   With the same rules as before
  */
-use std::fs::File;
-use std::io::{self, BufRead};
+mod utils;
 
 fn main() {
-  let file_path: &str = "./src/puzzle_input.txt";
-
-  let file: File = File::open(file_path).expect("Couldn't open specified file");
-
-  let reader = io::BufReader::new(file);
-
   let mut reports: Vec<Vec<u32>> = Vec::new();
-
-  for line in reader.lines() {
+  
+  for line in utils::read_puzzle_input("./src/example_input.txt") {
     let line: String = line.expect("Couldn't read a line");
 
     let mut report: Vec<u32> = Vec::new();
