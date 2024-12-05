@@ -11,7 +11,7 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 
 - [x] Day 1 - Historian Hysteria
 - [x] Day 2 - Red-Nose Reports
-- [ ] Day 3 - 
+- [x] Day 3 - Mull it over
 - [ ] Day 4
 - [ ] Day 5
 - [ ] Day 6
