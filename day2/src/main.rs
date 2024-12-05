@@ -43,8 +43,17 @@ fn main() {
 
   let mut safe_reports: u32 = 0;
 
+  // Uncomment to solve part one
+  // for report in reports {
+  //   if inc_dec_rule(report.clone()) && differ_rule(report.clone()) {
+  //     safe_reports += 1;
+  //   }
+  // }
+
   for report in reports {
     if inc_dec_rule(report.clone()) && differ_rule(report.clone()) {
+      safe_reports += 1;
+    } else if problem_dampener(report.clone()) {
       safe_reports += 1;
     }
   }
@@ -75,6 +84,21 @@ fn differ_rule(report: Vec<u32>) -> bool {
   }
 
   // println!("Report {:?} passes the differ rule?: {}", report, pass);
+
+  pass
+}
+
+fn problem_dampener(report: Vec<u32>) -> bool {
+  let mut pass: bool = false;
+
+  for idx in 0..report.len() {
+    let mut report_copy = report.clone();
+    report_copy.remove(idx);
+
+    if inc_dec_rule(report_copy.clone()) && differ_rule(report_copy.clone()) {
+      pass = true;
+    }
+  }
 
   pass
 }

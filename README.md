@@ -10,8 +10,8 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 ### List of days (checked the ones with both parts solved):
 
 - [x] Day 1 - Historian Hysteria
-- [ ] Day 2 - Red-Nose Reports
-- [ ] Day 3
+- [x] Day 2 - Red-Nose Reports
+- [ ] Day 3 - 
 - [ ] Day 4
 - [ ] Day 5
 - [ ] Day 6
