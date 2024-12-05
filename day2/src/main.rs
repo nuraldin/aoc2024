@@ -15,12 +15,12 @@
   If removing the bad level makes the report safe, then it is counted as safe.
   With the same rules as before
  */
-mod utils;
+use utils::read_puzzle_input;
 
 fn main() {
   let mut reports: Vec<Vec<u32>> = Vec::new();
   
-  for line in utils::read_puzzle_input("./src/example_input.txt") {
+  for line in read_puzzle_input("./src/example_input.txt") {
     let line: String = line.expect("Couldn't read a line");
 
     let mut report: Vec<u32> = Vec::new();

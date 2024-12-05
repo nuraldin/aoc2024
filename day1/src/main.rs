@@ -14,13 +14,13 @@
   It is needed to calculate the similarity score which tis the number of the left column times the times it appears on the right.
   All added together for each element of the left list.
  */
-mod utils;
+use utils::read_puzzle_input;
 
 fn main() {
   let mut column1: Vec<i32> = Vec::new();
   let mut column2: Vec<i32> = Vec::new();
 
-  for line in utils::read_puzzle_input("./src/first_challenge_input.txt") {
+  for line in read_puzzle_input("./src/first_challenge_input.txt") {
     let line = line.expect("Couldn't read input line");
 
     let columns: Vec<&str> = line.split_whitespace().collect();
