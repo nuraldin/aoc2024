@@ -13,7 +13,7 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [x] Day 2 - Red-Nose Reports
 - [x] Day 3 - Mull it over
 - [x] Day 4 - Ceres search
-- [ ] Day 5 - Print queue
+- [ ] Day 5 - Print queue (missing second star)
 - [ ] Day 6 - Guard gallivant
 - [ ] Day 7
 - [ ] Day 8
