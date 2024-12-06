@@ -12,9 +12,9 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [x] Day 1 - Historian Hysteria
 - [x] Day 2 - Red-Nose Reports
 - [x] Day 3 - Mull it over
-- [ ] Day 4
-- [ ] Day 5
-- [ ] Day 6
+- [ ] Day 4 - Ceres search
+- [ ] Day 5 - Print queue
+- [ ] Day 6 - Guard gallivant
 - [ ] Day 7
 - [ ] Day 8
 - [ ] Day 10
