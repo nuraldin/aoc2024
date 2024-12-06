@@ -12,7 +12,7 @@
  Part two:
 
 */
-use std::collections::HashMap;
+use std::{collections::HashMap, mem::swap};
 
 use utils::read_puzzle_input;
 
@@ -59,6 +59,8 @@ fn parse_page_updates_list() -> Vec<Vec<u32>> {
     pages_list.push(pages_line)
   }
   
+  // println!("page updates: {:?}", pages_list);
+
   pages_list
 }
 
@@ -106,5 +108,50 @@ fn check_rules(page_rules: HashMap<u32, Vec<u32>>, page_update: Vec<u32>) -> boo
 }
 
 fn correct_incorrect_update(incorrect_page_update: Vec<u32>, page_rules: HashMap<u32, Vec<u32>>) -> Vec<u32> {
-  incorrect_page_update
+  let mut corrected_page_update = incorrect_page_update.clone();
+  let default_vector: Vec<u32> = Vec::new();
+
+  let mut corrected_page_idx = 0;
+  loop {
+    if corrected_page_idx >= corrected_page_update.len() {
+      break;
+    } 
+    let incorrect_page = corrected_page_update[corrected_page_idx];
+
+    let rules = page_rules.get(&incorrect_page).unwrap_or_else(|| &default_vector);
+    let mut rules_idx = 0;
+    loop {
+      let mut swap_flag = false; 
+
+      if rules_idx >= rules.len() {
+        corrected_page_idx += 1;
+        // println!("Finished checking page: {}, corrected state: {:?}", incorrect_page, corrected_page_update);
+        break;
+      }
+
+      let rule = rules[rules_idx];
+      if incorrect_page_update.contains(&rule) {
+        let rule_idx = corrected_page_update.iter().position(|&page| page == rule).unwrap();
+        let page_idx = corrected_page_update.iter().position(|&page| page == incorrect_page_update[corrected_page_idx]).unwrap();
+
+        if rule_idx < page_idx {
+          corrected_page_update.swap(rule_idx,page_idx);
+          swap_flag = true;
+          // println!("Had to correct the page update, new state: {:?}", corrected_page_update);
+        }
+      }
+
+      if !swap_flag {
+        rules_idx += 1;
+      }
+    }
+
+    if check_rules(page_rules.clone(), corrected_page_update.clone()) {
+      break;
+    }
+  }
+
+  println!("incorrect page update: {:?}, corrected page update: {:?}, rules: {:?}", incorrect_page_update, corrected_page_update, page_rules);
+
+  corrected_page_update
 }
