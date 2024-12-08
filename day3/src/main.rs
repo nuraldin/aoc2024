@@ -12,20 +12,23 @@
  Similar to the first but now there are do() and don't() instructions that enable or disables future mul instructions.
  they all start `enabled`
 */
-use utils::read_puzzle_input;
+use utils::{get_challenge_part, read_puzzle_input, ChallengePart};
 use regex::Regex;
 
 fn main() {
+  
+
   for line in read_puzzle_input("./src/puzzle_input.txt") {
-    println!("The non corrupted and enabled multiplications add up to: {:?}", part_two(line));
+    match get_challenge_part() {
+      ChallengePart::One => println!("The non corrupted multiplications add up to: {:?}", part_one(line)),
+      ChallengePart::Two => println!("The non corrupted and enabled multiplications add up to: {:?}", part_two(line)),
+    }
   }
 }
 
-fn part_one(line: Result<String, std::io::Error>) -> u32 {
+fn part_one(line: String) -> u32 {
   let mut result = 0;
   let re = Regex::new(r"mul\((\d+),(\d*)\)").unwrap();
-
-  let line= line.expect("Couldn't read line");
 
   for cap in re.captures_iter(line.as_str()) {
     let x: u32 =  cap.get(1).unwrap().as_str().parse().unwrap(); // First number (x)
@@ -39,11 +42,9 @@ fn part_one(line: Result<String, std::io::Error>) -> u32 {
   result
 }
 
-fn part_two(line: Result<String, std::io::Error>) -> u32 {
+fn part_two(line: String) -> u32 {
   let mut result = 0;
   let re = Regex::new(r"do\(\)|don't\(\)|mul\((\d+),(\d*)\)").unwrap();
-
-  let line= line.expect("Couldn't read line");
 
   let mut enable_mul = true;
   for cap in re.captures_iter(line.as_str()) {

@@ -21,8 +21,6 @@ fn main() {
     let mut reports: Vec<Vec<u32>> = Vec::new();
 
     for line in read_puzzle_input("./src/example_input.txt") {
-        let line: String = line.expect("Couldn't read a line");
-
         let mut report: Vec<u32> = Vec::new();
 
         for level in line.trim().split_ascii_whitespace() {

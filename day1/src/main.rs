@@ -14,30 +14,34 @@
  It is needed to calculate the similarity score which tis the number of the left column times the times it appears on the right.
  All added together for each element of the left list.
 */
-use utils::read_puzzle_input;
+use utils::{get_challenge_part, read_puzzle_input, ChallengePart};
 
 fn main() {
-    let mut column1: Vec<i32> = Vec::new();
-    let mut column2: Vec<i32> = Vec::new();
+    let (mut column1, mut column2) = parse_puzzle_input();
 
-    for line in read_puzzle_input("./src/first_challenge_input.txt") {
-        let line = line.expect("Couldn't read input line");
-
-        let columns: Vec<&str> = line.split_whitespace().collect();
-
-        if columns.len() >= 2 {
-            let col1: i32 = columns[0].parse().unwrap_or_default();
-            let col2: i32 = columns[1].parse().unwrap_or_default();
-
-            column1.push(col1);
-            column2.push(col2);
-        }
+    match get_challenge_part() {
+      ChallengePart::One => println!("Locations distance: {:?}", calculate_distance(&mut column1, &mut column2)),
+      ChallengePart::Two => println!("Similarity score: {:?}", calculate_similarity_score(&column1, &column2)),
     }
-    // println!("Locations distance: {:?}", calculate_distance(&mut column1, &mut column2)) ;
-    println!(
-        "Similarity score: {:?}",
-        calculate_similarity_score(&column1, &column2)
-    );
+}
+
+fn parse_puzzle_input() -> (Vec<i32>, Vec<i32>) {
+  let mut column1: Vec<i32> = Vec::new();
+  let mut column2: Vec<i32> = Vec::new();
+
+  for line in read_puzzle_input("./src/first_challenge_input.txt") {
+      let columns: Vec<&str> = line.split_whitespace().collect();
+
+      if columns.len() >= 2 {
+          let col1: i32 = columns[0].parse().expect("One element of the input is corrupted");
+          let col2: i32 = columns[1].parse().expect("one element of the input is corrupted");
+
+          column1.push(col1);
+          column2.push(col2);
+      }
+  }
+
+  (column1, column2)
 }
 
 fn calculate_distance(column1: &mut Vec<i32>, column2: &mut Vec<i32>) -> i32 {
@@ -51,7 +55,7 @@ fn calculate_distance(column1: &mut Vec<i32>, column2: &mut Vec<i32>) -> i32 {
         results.push((column1[i] - column2[i]).abs());
     }
 
-    println!("Results: {:?}", results); // Output: [3, 3, 3, 4, 5, 9]
+    // println!("Results: {:?}", results); // Output: [3, 3, 3, 4, 5, 9]
 
     results.iter().sum::<i32>()
 }
@@ -61,11 +65,6 @@ fn calculate_similarity_score(column1: &Vec<i32>, column2: &Vec<i32>) -> i32 {
     let mut results: Vec<i32> = Vec::new();
 
     for i in 0..column1.len() {
-        println!("Element: {:?}", column1[i]);
-        println!(
-            "Count in the second array: {:?}",
-            column2.iter().filter(|&&x| x == column1[i]).count()
-        );
         let count: i32 = column2
             .iter()
             .filter(|&&x| x == column1[i])
@@ -76,7 +75,7 @@ fn calculate_similarity_score(column1: &Vec<i32>, column2: &Vec<i32>) -> i32 {
         results.push(count * column1[i]);
     }
 
-    println!("Results: {:?}", results); // Output: [3, 3, 3, 4, 5, 9]
+    // println!("Results: {:?}", results); // Output: [3, 3, 3, 4, 5, 9]
 
     results.iter().sum::<i32>()
 }

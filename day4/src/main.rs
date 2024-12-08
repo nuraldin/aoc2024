@@ -41,7 +41,7 @@ fn parse_puzzle() -> Vec<Vec<char>> {
   for line in read_puzzle_input("./src/puzzle_input.txt") {
     let mut puzzle_line: Vec<char> = Vec::new();
     
-    for letter in line.expect( "Couldn't get file line").chars() {
+    for letter in line.chars() {
       puzzle_line.push(letter)
     }
 

@@ -55,7 +55,7 @@ fn parse_page_updates_list() -> Vec<Vec<u32>> {
   let mut pages_list: Vec<Vec<u32>> = Vec::new();
 
   for line in read_puzzle_input("./src/puzzle_pages_list.txt") {
-    let pages_line: Vec<u32> = line.expect("Couldn't parse line").split(",").map(|s| s.parse().unwrap()).collect();
+    let pages_line: Vec<u32> = line.split(",").map(|s| s.parse().unwrap()).collect();
     pages_list.push(pages_line)
   }
   
@@ -68,7 +68,6 @@ fn parse_page_rules() -> HashMap<u32, Vec<u32>> {
   let mut page_rules = HashMap::new();
 
   for line in read_puzzle_input("./src/puzzle_page_ordering_rules.txt") {
-    let line = line.expect("Couldn't parse line");
     let page_rules_line: Vec<u32> = line.split("|").map(|s| s.parse().unwrap()).collect();
     
       // Add an element to the array corresponding to a key
