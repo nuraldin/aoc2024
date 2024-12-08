@@ -22,11 +22,66 @@ fn main() {
 
   match get_challenge_part() {
     ChallengePart::One => println!("The guard visited {} distinctive positions", calculate_positions(puzzle)),
-    ChallengePart::Two => println!("Not implemented")
+    ChallengePart::Two => println!("Obstruction possibilites: {}", calculate_obstructions(puzzle))
   }
 }
 
-fn calculate_positions(mut puzzle: Vec<Vec<char>>) -> usize {
+fn calculate_obstructions(mut puzzle: Vec<Vec<Location>>) -> usize {
+  let mut police = get_initial_police_position(&puzzle);
+  let mut obstacles = 0;
+
+  loop {
+    let next_position = get_police_next_position(&police);
+    let idx: usize = police.position.x.try_into().unwrap();
+    let idy: usize = police.position.y.try_into().unwrap();
+    let mut rotation_flag = false;
+    let mut obstacle_flag: bool = false;
+
+    // println!("Police current state: {:?}", police);
+    // println!("Police next position: {:?}", next_position);
+
+    if next_position.is_outside_puzzle(&puzzle) {
+      return obstacles
+    } else if next_position.is_obstacle(&puzzle) {
+      loop {
+        police.rotate_direction();
+      
+        // println!("Rotated police: {:?}", police);
+
+        if !get_police_next_position(&police).is_obstacle(&puzzle) {
+          break;
+        }
+      }
+
+      rotation_flag = true;
+    } else if next_position.with_obstacle_loops(police.clone(), &puzzle) {
+      obstacles += 1;
+      obstacle_flag = true;
+    }
+
+    if puzzle[idy][idx].element != '^' {
+      puzzle[idy][idx].element = match rotation_flag {
+        true => '+',
+        false => match police.direction { 
+          Direction::Left | Direction::Right => if puzzle[idy][idx].element == '|' { '+' } else {'-'} , 
+          Direction::Down | Direction::Up => if puzzle[idy][idx].element == '-' { '+' } else {'|'}, 
+        },
+      };
+      puzzle[idy][idx].directions.push(police.direction.clone());
+    }
+    police.position = get_police_next_position(&police);
+
+    if obstacle_flag {
+      println!("There was an obstacle, puzzle's current state: ");
+      for line in puzzle.clone() {
+        let elements: Vec<char> = line.iter().map(|item| item.element).collect();
+        println!("{:?}", elements);
+      }
+    }
+  }
+}
+
+fn calculate_positions(mut puzzle: Vec<Vec<Location>>) -> usize {
   let mut police = get_initial_police_position(&puzzle);
   
   loop {
@@ -38,7 +93,7 @@ fn calculate_positions(mut puzzle: Vec<Vec<char>>) -> usize {
     // println!("Police next position: {:?}", next_position);
 
     if next_position.is_outside_puzzle(&puzzle) {
-      puzzle[idy][idx] = 'X';
+      puzzle[idy][idx].element = 'X';
       break;
     } else if next_position.is_obstacle(&puzzle) {
       loop {
@@ -52,7 +107,7 @@ fn calculate_positions(mut puzzle: Vec<Vec<char>>) -> usize {
       }
     } 
 
-    puzzle[idy][idx] = 'X';
+    puzzle[idy][idx].element = 'X';
     police.position = get_police_next_position(&police);
 
     // println!("Puzzle's current state: ");
@@ -61,40 +116,58 @@ fn calculate_positions(mut puzzle: Vec<Vec<char>>) -> usize {
     // }
   }
 
-  puzzle.iter().flatten().filter(|&&item| item == 'X' ).count()
+  puzzle.iter().flatten().filter(|&item| item.element == 'X' ).count()
 }
 
 
-fn parse_input() -> Vec<Vec<char>> {
+fn parse_input() -> Vec<Vec<Location>> {
   let mut input = Vec::new();
 
-  for line in read_puzzle_input("./src/puzzle_input.txt") {
-    input.push(line.chars().collect())
+  for line in read_puzzle_input("./src/example_input.txt") {
+    input.push(line.chars().map(|item| Location { element: item, directions: Vec::new()}).collect())
   }
 
   input
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct Position {
   x: i32,
   y: i32,
 }
 
 impl Position {
-  fn is_outside_puzzle(&self, puzzle: &Vec<Vec<char>>) -> bool {
+  fn is_outside_puzzle(&self, puzzle: &Vec<Vec<Location>>) -> bool {
     (self.x < 0 || self.y < 0) || (self.x >= puzzle.len().try_into().unwrap() || self.y >= puzzle[0].len().try_into().unwrap())
   }
   
-  fn is_obstacle(&self, puzzle: &Vec<Vec<char>>) -> bool {
+  fn is_obstacle(&self, puzzle: &Vec<Vec<Location>>) -> bool {
     let idx: usize = self.x.try_into().unwrap();
     let idy: usize = self.y.try_into().unwrap();
 
-    puzzle[idy][idx] == '#'
+    puzzle[idy][idx].element == '#'
+  }
+
+  fn with_obstacle_loops(&self,mut police: Police, puzzle: &Vec<Vec<Location>>) -> bool{
+    // Assume I need to rotate
+    police.rotate_direction();
+
+    let idx: usize = police.position.x.try_into().unwrap();
+    let idy: usize = police.position.y.try_into().unwrap();
+
+    while !self.is_outside_puzzle(puzzle) {
+      match puzzle[idy][idx].element {
+        '^' => if police.direction == Direction::Up { return true } else { continue }, 
+        '|' | '-' | '+' => if puzzle[idy][idx].directions.contains(&police.direction) { return true } else { continue },
+        _ => continue,
+      }
+    }
+
+    false
   }
 }
 
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Debug)]
 enum Direction {
   Up,
   Left,
@@ -114,7 +187,7 @@ impl Direction {
   }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct Police {
   position: Position,
   direction: Direction,
@@ -131,16 +204,22 @@ impl Police {
   }
 }
 
-fn get_initial_police_position(puzzle: &Vec<Vec<char>>) -> Police {
+#[derive(Clone, Debug)]
+struct Location {
+  element: char,
+  directions: Vec<Direction>
+}
+
+fn get_initial_police_position(puzzle: &Vec<Vec<Location>>) -> Police {
   for (row_idx, row) in puzzle.iter().enumerate() {
     for (column_idx, column) in row.iter().enumerate() {
-      match column {
+      match column.element {
         '>' | '<' | 'v' | '^' => return Police { 
           position: Position { 
             x: column_idx.try_into().unwrap(), 
             y: row_idx.try_into().unwrap() 
           }, 
-          direction: Direction::from_char(*column)
+          direction: Direction::from_char(column.element)
         },
         _ => continue,
       }
