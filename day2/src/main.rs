@@ -15,41 +15,50 @@
  If removing the bad level makes the report safe, then it is counted as safe.
  With the same rules as before
 */
-use utils::read_puzzle_input;
+use utils::{get_challenge_part, read_puzzle_input, ChallengePart};
 
 fn main() {
-    let mut reports: Vec<Vec<u32>> = Vec::new();
+  let reports = parse_input();
+  let mut safe_reports: u32 = 0;
 
-    for line in read_puzzle_input("./src/example_input.txt") {
-        let mut report: Vec<u32> = Vec::new();
-
-        for level in line.trim().split_ascii_whitespace() {
-            report.push(level.parse().expect("Couldn't parse level"))
+  match get_challenge_part() {
+    ChallengePart::One => {
+      for report in reports {
+        if inc_dec_rule(report.clone()) && differ_rule(report.clone()) {
+          safe_reports += 1;
         }
-
-        // println!("Read a report: {:?}", report);
-
-        reports.push(report);
-    }
-
-    let mut safe_reports: u32 = 0;
-
-    // Uncomment to solve part one
-    // for report in reports {
-    //   if inc_dec_rule(report.clone()) && differ_rule(report.clone()) {
-    //     safe_reports += 1;
-    //   }
-    // }
-
-    for report in reports {
+      }
+    },
+    ChallengePart::Two => {
+      for report in reports {
         if inc_dec_rule(report.clone()) && differ_rule(report.clone()) {
             safe_reports += 1;
         } else if problem_dampener(report.clone()) {
             safe_reports += 1;
         }
+      }
     }
+  }
+    
+  println!("The number of safe reports is {}", safe_reports);
+}
 
-    println!("The number of safe reports is {}", safe_reports);
+fn parse_input() -> Vec<Vec<u32>> {
+  let mut reports: Vec<Vec<u32>> = Vec::new();
+
+  for line in read_puzzle_input("./src/example_input.txt") {
+      let mut report: Vec<u32> = Vec::new();
+
+      for level in line.trim().split_ascii_whitespace() {
+          report.push(level.parse().expect("Couldn't parse level"))
+      }
+
+      // println!("Read a report: {:?}", report);
+
+      reports.push(report);
+  }
+
+  reports
 }
 
 fn inc_dec_rule(report: Vec<u32>) -> bool {
