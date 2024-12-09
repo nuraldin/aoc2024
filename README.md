@@ -17,7 +17,7 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [ ] Day 6 - Guard gallivant
 - [ ] Day 7 - Bridge repair
 - [ ] Day 8 - Resonant collinearity
-- [ ] Day 9 - Disk fragmenter
+- [x] Day 9 - Disk fragmenter
 - [ ] Day 10 -
 - [ ] Day 11 -
 - [ ] Day 12 -
