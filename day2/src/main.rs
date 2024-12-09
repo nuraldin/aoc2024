@@ -15,13 +15,15 @@
  If removing the bad level makes the report safe, then it is counted as safe.
  With the same rules as before
 */
-use utils::{get_challenge_part, read_puzzle_input, ChallengePart};
+use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
 
 fn main() {
-  let reports = parse_input();
+  let challenge_config = get_challenge_config();
+
+  let reports = parse_input(challenge_config.is_test);
   let mut safe_reports: u32 = 0;
 
-  match get_challenge_part() {
+  match challenge_config.part {
     ChallengePart::One => {
       for report in reports {
         if inc_dec_rule(report.clone()) && differ_rule(report.clone()) {
@@ -43,10 +45,12 @@ fn main() {
   println!("The number of safe reports is {}", safe_reports);
 }
 
-fn parse_input() -> Vec<Vec<u32>> {
+fn parse_input(is_test: bool) -> Vec<Vec<u32>> {
   let mut reports: Vec<Vec<u32>> = Vec::new();
 
-  for line in read_puzzle_input("./src/example_input.txt") {
+  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
+
+  for line in read_puzzle_input(file_path) {
       let mut report: Vec<u32> = Vec::new();
 
       for level in line.trim().split_ascii_whitespace() {
