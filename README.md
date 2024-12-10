@@ -18,7 +18,7 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [ ] Day 7 - Bridge repair
 - [ ] Day 8 - Resonant collinearity
 - [x] Day 9 - Disk fragmenter
-- [ ] Day 10 -
+- [x] Day 10 - Hoof it
 - [ ] Day 11 -
 - [ ] Day 12 -
 - [ ] Day 13 -
