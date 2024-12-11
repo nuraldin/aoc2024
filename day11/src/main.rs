@@ -32,7 +32,7 @@ fn main() {
 
     match challenge_config.part {
       ChallengePart::One => println!("After blinking {} times the amount of stones is: {}", 25, after_n_blinks(25, stones)),
-      ChallengePart::Two => println!("After blinking {} times the amount of stones is: {}", 75, after_n_blinks(30, stones)),
+      ChallengePart::Two => println!("After blinking {} times the amount of stones is: {}", 75, after_n_blinks(50, stones)),
     }
 }
 
@@ -89,23 +89,19 @@ fn blink(stones: Vec<u64>)  -> Vec<u64> {
   let mut next_stones = Vec::new();
   
   for stone in stones {
-    let string_stone = stone.to_string();
-
     if stone == 0 {
       next_stones.push(1);
-    } else if string_stone.len() % 2 == 0 { 
-      let (left, right) = string_stone.split_at(string_stone.len() / 2);
-
-      let left_value: u64 = left.parse().unwrap();
+    } else if stone.to_string().len() % 2 == 0 { 
+      let digits = 10u64.pow((stone as f64).log10().ceil() as u32 / 2); // Determine the split position
+      let left_value = stone / digits; // Extract higher digits
+      let right_value = stone % digits; 
+    
       next_stones.push(left_value);
-
-      let right_value: u64 = right.parse().unwrap();
       next_stones.push(right_value);
     } else {
       next_stones.push(stone * 2024)
     }
 
   }
-  
   next_stones
 }
