@@ -32,20 +32,14 @@ fn main() {
 
     match challenge_config.part {
       ChallengePart::One => println!("After blinking {} times the amount of stones is: {}", 25, after_n_blinks(25, stones)),
-      ChallengePart::Two => println!("After blinking {} times the amount of stones is: {}", 75, after_n_blinks(75, stones)),
+      ChallengePart::Two => println!("After blinking {} times the amount of stones is: {}", 75, after_n_blinks(30, stones)),
     }
 }
 
-#[derive(Debug, Clone)]
-struct Stone {
-  engravement: String,
-  value: u64,
-}
-
-fn after_n_blinks(blinks: i32, stones: Vec<Stone>) -> usize {
+fn after_n_blinks(blinks: i32, stones: Vec<u64>) -> usize {
   let num_threads = 8; // split the blinking operation in threads.
   let stones_chunk_size = (stones.len() / num_threads).max(1);
-  let stones_chunks: Vec<Vec<Stone>> = stones
+  let stones_chunks: Vec<Vec<u64>> = stones
     .chunks(stones_chunk_size)
     .map(|chunk| chunk.to_vec())
     .collect();
@@ -75,7 +69,7 @@ fn after_n_blinks(blinks: i32, stones: Vec<Stone>) -> usize {
   stones
 }
 
-fn get_stones(is_test: bool) -> Vec<Stone> {
+fn get_stones(is_test: bool) -> Vec<u64> {
   let mut stones = Vec::new();
 
   let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
@@ -84,46 +78,31 @@ fn get_stones(is_test: bool) -> Vec<Stone> {
     let arrangement: Vec<&str> = line.split(' ').collect(); 
 
     for stone in arrangement {
-      stones.push(Stone {
-        engravement: stone.to_string(),
-        value: stone.parse().unwrap()
-      })
+      stones.push(stone.parse().unwrap())
     }
   }
 
   stones
 }
 
-fn blink(stones: Vec<Stone>)  -> Vec<Stone> {
+fn blink(stones: Vec<u64>)  -> Vec<u64> {
   let mut next_stones = Vec::new();
   
   for stone in stones {
-    if stone.value == 0 {
-      next_stones.push(Stone {
-        engravement: String::from('1'),
-        value: 1,
-      })
-    } else if stone.engravement.len() % 2 == 0 { 
-      let (left, right) = stone.engravement.split_at(stone.engravement.len() / 2);
-      // println!("left split: {left}, right split: {right}");
+    let string_stone = stone.to_string();
+
+    if stone == 0 {
+      next_stones.push(1);
+    } else if string_stone.len() % 2 == 0 { 
+      let (left, right) = string_stone.split_at(string_stone.len() / 2);
 
       let left_value: u64 = left.parse().unwrap();
-      next_stones.push(Stone {
-        engravement: left_value.to_string(),
-        value: left_value,
-      });
+      next_stones.push(left_value);
 
       let right_value: u64 = right.parse().unwrap();
-      next_stones.push(Stone {
-        engravement: right_value.to_string(),
-        value: right_value
-      });
+      next_stones.push(right_value);
     } else {
-      let next_value = stone.value * 2024;
-      next_stones.push(Stone {
-        engravement: next_value.to_string(),
-        value: next_value,
-      })
+      next_stones.push(stone * 2024)
     }
 
   }
