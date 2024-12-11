@@ -3,9 +3,13 @@
 
  Part one:
 
+ The input is a map of antenna locations that resonate at a frequency shown by a char.
+ Each antenna pair creates antinodes outside this antenas in the same line in the map. One antinode on each side only at the same distance the antenas are.
+ The solution is to calculate how many unique antinodes there are, the antenna locations that have antinode are not counted.
+
  Part two:
 
- The antinodes can happen also in positions of other antennas
+ The antinodes can happen also in positions of other antennas and infinitely
 
 */
 use utils::{get_challenge_config, read_puzzle_input, ChallengeConfig, ChallengePart};

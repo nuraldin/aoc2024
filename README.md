@@ -19,7 +19,7 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [x] Day 8 - Resonant collinearity
 - [x] Day 9 - Disk fragmenter
 - [x] Day 10 - Hoof it
-- [ ] Day 11 -
+- [ ] Day 11 - Plutonian Pebbles
 - [ ] Day 12 -
 - [ ] Day 13 -
 - [ ] Day 14 -
