@@ -36,6 +36,22 @@ fn main() {
     }
 }
 
+fn get_stones(is_test: bool) -> Vec<u64> {
+  let mut stones = Vec::new();
+
+  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
+
+  for line in read_puzzle_input(file_path) {
+    let arrangement: Vec<&str> = line.split(' ').collect(); 
+
+    for stone in arrangement {
+      stones.push(stone.parse().unwrap())
+    }
+  }
+
+  stones
+}
+
 fn after_n_blinks(blinks: i32, stones: Vec<u64>) -> usize {
   let num_threads = 8; // split the blinking operation in threads.
   let stones_chunk_size = (stones.len() / num_threads).max(1);
@@ -66,22 +82,6 @@ fn after_n_blinks(blinks: i32, stones: Vec<u64>) -> usize {
     // println!("stones chunk: {:?}", chunk_result);
   }
   
-  stones
-}
-
-fn get_stones(is_test: bool) -> Vec<u64> {
-  let mut stones = Vec::new();
-
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
-
-  for line in read_puzzle_input(file_path) {
-    let arrangement: Vec<&str> = line.split(' ').collect(); 
-
-    for stone in arrangement {
-      stones.push(stone.parse().unwrap())
-    }
-  }
-
   stones
 }
 
