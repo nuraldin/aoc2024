@@ -5,6 +5,8 @@
 
  Part two:
 
+ The antinodes can happen also in positions of other antennas
+
 */
 use utils::{get_challenge_config, read_puzzle_input, ChallengeConfig, ChallengePart};
 
@@ -15,8 +17,8 @@ fn main() {
   // println!("Puzzle shape: {:?}", puzzle);
 
   match challenge_config.part {
-    ChallengePart::One => println!("Number of antinodes: {}", get_antinodes(puzzle)),
-    ChallengePart::Two => println!("Not implemented yet"),
+    ChallengePart::One => println!("Number of antinodes: {}", get_antinodes(puzzle, false)),
+    ChallengePart::Two => println!("Number of super antinodes: {}", get_antinodes(puzzle, true)),
   }
 }
 
@@ -63,11 +65,11 @@ fn parse_input(config: &ChallengeConfig) -> Puzzle {
   Puzzle { map_size, antennas }
 }
 
-fn get_antinodes(puzzle: Puzzle) -> i32 {
+fn get_antinodes(puzzle: Puzzle, is_super: bool) -> i32 {
   let antenna_pairs = get_antenna_pairs(&puzzle.antennas);
   // println!("Antenna pairs: {:?}", antenna_pairs);
 
-  let antenna_pairs_antinodes = get_antenna_pairs_antinodes(puzzle.map_size, &antenna_pairs);
+  let antenna_pairs_antinodes = get_antenna_pairs_antinodes(puzzle.map_size, &antenna_pairs, is_super);
   // println!("Antenna pair antinodes: {:?}", antenna_pairs_antinodes);
 
   antenna_pairs_antinodes.iter().count() as i32
@@ -88,35 +90,60 @@ fn get_antenna_pairs(antennas: &Vec<Antenna>) -> Vec<AntennaPair>{
   antenna_pairs
 }
 
-fn get_antenna_pairs_antinodes(map_size: i32, antenna_pairs: &Vec<AntennaPair>) -> Vec<Location> {
+fn get_antenna_pairs_antinodes(map_size: i32, antenna_pairs: &Vec<AntennaPair>, is_super: bool) -> Vec<Location> {
   let mut antinodes = Vec::new();
 
   for antenna_pair in antenna_pairs {
     let antenna_pair_distance = get_antenna_pair_distance(antenna_pair);
     // println!("Antenna pair: {:?}, 'Antenna pair distance: {:?}", antenna_pair, antenna_pair_distance);
-
-    if !is_location_outbounds(&antenna_pair.left.location, &antenna_pair_distance, map_size, false) {
-      let antinode = Location { 
-        row: antenna_pair.left.location.row + antenna_pair_distance.row, 
-        col: antenna_pair.left.location.col + antenna_pair_distance.col
-      };
-      if !antinodes.contains(&antinode) {
-        antinodes.push(antinode)
+    
+    if is_super {
+      if !antinodes.contains(&antenna_pair.left.location) {
+        antinodes.push(antenna_pair.left.location.clone())
       }
+
+      if !antinodes.contains(&antenna_pair.right.location) {
+        antinodes.push(antenna_pair.right.location.clone())
+      } 
+    }
+
+    let mut next_antinode_location = Location { 
+      row: antenna_pair.left.location.row + antenna_pair_distance.row, 
+      col: antenna_pair.left.location.col + antenna_pair_distance.col
+    };
+    while !is_location_outbounds(&next_antinode_location, map_size) {
+      if !antinodes.contains(&next_antinode_location) {
+        antinodes.push(next_antinode_location.clone())
+      }
+
+      if !is_super {
+        break;
+      }
+
+      next_antinode_location = Location { 
+        row: next_antinode_location.row + antenna_pair_distance.row, 
+        col: next_antinode_location.col + antenna_pair_distance.col
+      };
     } 
 
-
-    if !is_location_outbounds(&antenna_pair.right.location, &antenna_pair_distance, map_size, true) {
-      let antinode = Location { 
-        row: antenna_pair.right.location.row - antenna_pair_distance.row, 
-        col: antenna_pair.right.location.col - antenna_pair_distance.col
-      };
-
-      if !antinodes.contains(&antinode) {
-        antinodes.push(antinode);
+    let mut next_antinode_location = Location { 
+      row: antenna_pair.right.location.row - antenna_pair_distance.row, 
+      col: antenna_pair.right.location.col - antenna_pair_distance.col
+    };
+    while !is_location_outbounds(&&next_antinode_location, map_size) {
+      if !antinodes.contains(&next_antinode_location) {
+        antinodes.push(next_antinode_location.clone());
       }
-    } 
 
+      if !is_super {
+        break;
+      }
+
+      next_antinode_location = Location { 
+        row: next_antinode_location.row - antenna_pair_distance.row, 
+        col: next_antinode_location.col - antenna_pair_distance.col
+      };
+    } 
   }
 
   antinodes
@@ -132,10 +159,6 @@ fn get_antenna_pair_distance(antenna_pair: &AntennaPair) -> Location {
   }
 }
 
-fn is_location_outbounds(location: &Location, distance: &Location, map_size: i32, is_right: bool) -> bool {
-  let multiplier = if is_right { -1 } else { 1 };
-  let antinode_row = location.row + (distance.row * multiplier);
-  let antinode_col = location.col + (distance.col * multiplier);
-
-  antinode_row >= map_size|| antinode_row < 0 || antinode_col >= map_size || antinode_col < 0
+fn is_location_outbounds(location: &Location, map_size: i32) -> bool {
+  location.row >= map_size|| location.row < 0 || location.col >= map_size || location.col < 0
 }

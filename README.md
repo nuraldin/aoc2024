@@ -16,7 +16,7 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [ ] Day 5 - Print queue (missing second star)
 - [ ] Day 6 - Guard gallivant
 - [ ] Day 7 - Bridge repair
-- [ ] Day 8 - Resonant collinearity
+- [x] Day 8 - Resonant collinearity
 - [x] Day 9 - Disk fragmenter
 - [x] Day 10 - Hoof it
 - [ ] Day 11 -
