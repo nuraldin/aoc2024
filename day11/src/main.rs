@@ -20,7 +20,7 @@
  How many stones will there be a after blinking 75 times?
 
 */
-use std::thread;
+use std::{collections::HashMap, thread};
 
 use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
 
@@ -32,11 +32,11 @@ fn main() {
 
     match challenge_config.part {
       ChallengePart::One => println!("After blinking {} times the amount of stones is: {}", 25, after_n_blinks(25, stones)),
-      ChallengePart::Two => println!("After blinking {} times the amount of stones is: {}", 75, after_n_blinks(50, stones)),
+      ChallengePart::Two => println!("After blinking {} times the amount of stones is: {}", 75, after_n_blinks_map(75, stones)),
     }
 }
 
-fn get_stones(is_test: bool) -> Vec<u64> {
+fn get_stones(is_test: bool) -> Vec<usize> {
   let mut stones = Vec::new();
 
   let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
@@ -52,10 +52,10 @@ fn get_stones(is_test: bool) -> Vec<u64> {
   stones
 }
 
-fn after_n_blinks(blinks: i32, stones: Vec<u64>) -> usize {
+fn after_n_blinks(blinks: i32, stones: Vec<usize>) -> usize {
   let num_threads = 8; // split the blinking operation in threads.
   let stones_chunk_size = (stones.len() / num_threads).max(1);
-  let stones_chunks: Vec<Vec<u64>> = stones
+  let stones_chunks: Vec<Vec<usize>> = stones
     .chunks(stones_chunk_size)
     .map(|chunk| chunk.to_vec())
     .collect();
@@ -65,7 +65,7 @@ fn after_n_blinks(blinks: i32, stones: Vec<u64>) -> usize {
   for stones_chunk in stones_chunks {
     let handle = thread::spawn(move || {
       let mut stones = stones_chunk;
-      for n_blink in 0..blinks {
+      for _ in 0..blinks {
         stones = blink(stones);
         // println!("Stone arrangement after {} blinks: {:?}", n_blink + 1, stones.iter().map(|stone| format!("{} ", stone.engravement)).collect::<String>());
       }
@@ -85,7 +85,7 @@ fn after_n_blinks(blinks: i32, stones: Vec<u64>) -> usize {
   stones
 }
 
-fn blink(stones: Vec<u64>)  -> Vec<u64> {
+fn blink(stones: Vec<usize>)  -> Vec<usize> {
   let mut next_stones = Vec::new();
   
   for stone in stones {
@@ -93,8 +93,8 @@ fn blink(stones: Vec<u64>)  -> Vec<u64> {
       next_stones.push(1);
     } else if stone.to_string().len() % 2 == 0 { 
       let digits = 10u64.pow((stone as f64).log10().ceil() as u32 / 2); // Determine the split position
-      let left_value = stone / digits; // Extract higher digits
-      let right_value = stone % digits; 
+      let left_value = stone / digits as usize; // Extract higher digits
+      let right_value = stone % digits as usize; 
     
       next_stones.push(left_value);
       next_stones.push(right_value);
@@ -103,5 +103,43 @@ fn blink(stones: Vec<u64>)  -> Vec<u64> {
     }
 
   }
+
   next_stones
 }
+
+fn blink_simple(stones: HashMap<usize, usize>)  -> HashMap<usize, usize> {
+  let mut next_stones = HashMap::new();
+
+  for (stone, amount) in stones {
+    let num = format!("{}", stone);
+    if stone == 0 {
+      next_stones.entry(1).and_modify(|value| *value += amount).or_insert(amount);
+    } else if num.len() % 2 == 0 { 
+      let left_value = num[..num.len() / 2].parse().unwrap(); // Extract higher digits
+      let right_value = num[num.len() / 2..].parse().unwrap(); 
+    
+      next_stones.entry(left_value).and_modify(|value| *value +=  amount).or_insert(amount);
+      next_stones.entry(right_value).and_modify(|value| *value +=  amount).or_insert(amount);
+
+    } else {
+      next_stones.entry(stone * 2024).and_modify(|value| *value += amount).or_insert(amount);
+    }
+  }
+  
+  next_stones
+}
+
+fn after_n_blinks_map(blinks: i32, stones: Vec<usize>) -> usize {
+  let mut blink_map: HashMap<usize, usize> = HashMap::new();
+
+  for stone in stones {
+    blink_map.entry(stone).or_insert(1);
+  }
+
+  for n_blinks in 0..blinks {
+    blink_map = blink_simple(blink_map);
+  }
+
+  blink_map.values().sum()  
+}
+
