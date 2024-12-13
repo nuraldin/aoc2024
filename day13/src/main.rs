@@ -1,5 +1,3 @@
-use std::u32::MAX;
-
 /*
  Advent of Code 2024 Day 13: Claw Contraption
 
@@ -15,6 +13,13 @@ use std::u32::MAX;
  What is the fewest tokens you would have to spend to win all possible prizes?
 
  Part two:
+
+ add to the prize locations 10_000_000_000_000 and calculate the tokens again
+
+ Solution:
+
+ For this challenge I used linear programming to solve for one of the tokens variables. Even though I started trying to brute force by checking each button a and b token combination that satisfied the equation.
+ I then restorted to the math approach for part tow as it wouldn't have scaled previous algorithm.
 */
 use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
 use regex::Regex;
@@ -25,15 +30,15 @@ fn main() {
     let parsed_input = parse_input(challenge_config.is_test);
 
     match challenge_config.part {
-      ChallengePart::One => println!("The minimum tokens needed to get any of the prizes is: {}", calculate_minimum_tokens(parsed_input)),
-      ChallengePart::Two => println!("The minimum tokens needed to get any of the prizes is: {}", calculate_minimum_tokens(parsed_input)),
+      ChallengePart::One => println!("The minimum tokens needed to get any of the prizes is: {}", calculate_minimum_tokens(parsed_input, 0)),
+      ChallengePart::Two => println!("The minimum tokens needed to get any of the prizes is: {}", calculate_minimum_tokens(parsed_input, 10_000_000_000_000)),
     }
 }
 
 #[derive(Debug)]
 struct Location {
-  x: u32,
-  y: u32,
+  x: i64,
+  y: i64,
 }
 
 #[derive(Debug)]
@@ -93,39 +98,37 @@ fn parse_input(is_test: bool) -> Vec<ClawMachineConfig> {
   claw_machine_configs
 }
 
-fn calculate_minimum_tokens(configs: Vec<ClawMachineConfig>) -> u32 {
+fn calculate_minimum_tokens(configs: Vec<ClawMachineConfig>, correction: i64) -> i64 {
   let mut minimum_tokens_needed = 0;
   for config in configs {
-    minimum_tokens_needed += get_tokens(config);
+    minimum_tokens_needed += get_tokens(config, correction);
   }
 
   minimum_tokens_needed
 }
 
-fn get_tokens(config: ClawMachineConfig) -> u32 {
-  let mut valid_combinations: Vec<(u32, u32)> = Vec::new();
+fn get_tokens(config: ClawMachineConfig, correction: i64) -> i64 {
+  let w = config.prize.x + correction;
+  let y = config.prize.y + correction;
+  let a = config.button_config.a.x;
+  let b = config.button_config.b.x;
+  let c = config.button_config.a.y;
+  let d = config.button_config.b.y;
 
-  for n in 0..100 {
-    for m in 0..100 {
-      if satisfies_calculation(&config, n, m) {
-        valid_combinations.push((n,m))
-      }
-    }
+  let m = (c * w - a * y) / ( c * b - a * d);
+  let n = (y - m * d) / c;
+
+  // println!("m: {m}, n: {n}");
+
+  let result_x = n * a + m * b;
+  let result_y = n * c + m * d;
+
+  // println!("X={w}, Y={y}");
+  // println!("X={result_x},Y={result_y}");
+
+  if result_x == w && result_y == y {
+    return n * 3 + m;
   }
-  println!("config: {config:?}, \nvalid_combinations: {valid_combinations:#?}\n");
 
-  let mut minimum_tokens_needed = if valid_combinations.len() > 0 { MAX } else { 0 };
-  for (a_presses, b_presses)in valid_combinations {
-    let tokens = a_presses * 3 + b_presses;
-    minimum_tokens_needed = minimum_tokens_needed.min(tokens);
-  }
-
-  println!("minimum tokens needed: {minimum_tokens_needed}\n");
-
-  minimum_tokens_needed
-}
-
-fn satisfies_calculation(config: &ClawMachineConfig, n: u32, m: u32) -> bool {
-  config.prize.x == config.button_config.a.x * n + config.button_config.b.x * m &&
-  config.prize.y == config.button_config.a.y * n + config.button_config.b.y * m
+  0
 }
