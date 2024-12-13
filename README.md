@@ -20,8 +20,8 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [x] Day 9 - Disk fragmenter
 - [x] Day 10 - Hoof it
 - [ ] Day 11 - Plutonian Pebbles
-- [ ] Day 12 -
-- [ ] Day 13 -
+- [ ] Day 12 - Garden Groups
+- [ ] Day 13 - Claw Contraption 
 - [ ] Day 14 -
 - [ ] Day 15 -
 - [ ] Day 16 -
@@ -33,3 +33,4 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [ ] Day 22 -
 - [ ] Day 23 -
 - [ ] Day 24 -
+- [ ] Day 25 -

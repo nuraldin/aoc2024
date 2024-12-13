@@ -1,5 +1,5 @@
 /*
- Advent of Code 2024 Day 13
+ Advent of Code 2024 Day 10
 
  Part one:
 
