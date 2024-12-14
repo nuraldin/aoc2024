@@ -1,5 +1,3 @@
-use std::{thread, time::Duration};
-
 use regex::Regex;
 /*
  Advent of Code 2024 Day 14: Restroom Redoubt
@@ -18,6 +16,17 @@ use regex::Regex;
  What will the safety factor be after exactly 100 seconds have elapsed.
 
  Part two:
+
+ There is an easter egg where the robots are forming a christmass tree. 
+ What is the fewest number of seconds that must elapse for the robots to display the Easter egg?
+
+ Solution:
+
+ unfortunately for part two first time I had to copy the solution of davidkna https://www.reddit.com/r/adventofcode/comments/1hdvhvu/comment/m213uxb/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+ as my printing wasn't showing the correct numbers. His solution worked at the first attempt.
+ I noticed later that I was calculating positions wrongly, corrected that and found the image where it should have been.
+
+ In general, the idea is to calculate using modulus arithmetic the possition after n secodns of the robots and multiply the robots of each quadrant. That worked initially but my heuristic for finding the christmas tree didn't.n
 */
 use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
 
@@ -27,7 +36,7 @@ fn main() {
     let robot_list = parse_robot_list(challenge_config.is_test);
     // println!("robot_list: {robot_list:?}");
 
-    let seconds = 100000; // Change this to test other seconds
+    let seconds = 7000; // Change this to test other seconds
     let room_dimension = RoomDimension {
       x: if challenge_config.is_test { 11 } else { 101 },
       y: if challenge_config.is_test { 7 } else { 103 }
@@ -62,7 +71,7 @@ fn parse_robot_list(is_test: bool) -> Vec<Robot> {
   robot_list
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 struct Position {
   x: i32,
   y: i32,
@@ -71,27 +80,22 @@ struct Position {
 type Speed = Position;
 type RoomDimension = Position;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 struct Robot {
   position: Position,
   speed: Speed,
 }
 
 fn safety_factor(mut robot_list: Vec<Robot>, seconds: i32, room_dimension: RoomDimension) -> i32 {
-  for seconds in 0..2143 {
+  for seconds in 1..seconds {
     for robot in robot_list.iter_mut() {
-      robot.position.x = (robot.position.x + seconds * robot.speed.x).rem_euclid(room_dimension.x);
-      robot.position.y = (robot.position.y + seconds * robot.speed.y).rem_euclid(room_dimension.y);
+      robot.position.x = (robot.position.x + robot.speed.x).rem_euclid(room_dimension.x);
+      robot.position.y = (robot.position.y + robot.speed.y).rem_euclid(room_dimension.y);
     } 
 
-      print_map(&robot_list, &room_dimension, seconds);
+    print_map(&robot_list, &room_dimension, seconds);
   }
   
-  // for robot in robot_list.iter_mut() {
-  //   robot.position.x = (robot.position.x + seconds * robot.speed.x).rem_euclid(room_dimension.x);
-  //   robot.position.y = (robot.position.y + seconds * robot.speed.y).rem_euclid(room_dimension.y);
-  // }
-
   let mut top_right = vec![];
   let mut top_left = vec![];
   let mut bottom_right = vec![];
@@ -133,11 +137,10 @@ fn print_map(robot_list: &Vec<Robot>, room_dimension: &RoomDimension, seconds: i
     map_row.push(map_line.concat());
   }
 
-  if map_row.iter().any(|row| row.contains("***")) {
+  if map_row.iter().any(|row| row.contains("******")) {
     println!("seconds: {seconds}\n");
     for row in map_row  {
       println!("{row}");
     }
   }
-  
 }

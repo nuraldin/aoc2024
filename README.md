@@ -22,7 +22,7 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [ ] Day 11 - Plutonian Pebbles
 - [ ] Day 12 - Garden Groups
 - [x] Day 13 - Claw Contraption 
-- [ ] Day 14 - Restroom Redoubt
+- [x] Day 14 - Restroom Redoubt
 - [ ] Day 15 -
 - [ ] Day 16 -
 - [ ] Day 17 -
