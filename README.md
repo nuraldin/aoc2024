@@ -21,8 +21,8 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [x] Day 10 - Hoof it
 - [ ] Day 11 - Plutonian Pebbles
 - [ ] Day 12 - Garden Groups
-- [ ] Day 13 - Claw Contraption 
-- [ ] Day 14 -
+- [x] Day 13 - Claw Contraption 
+- [ ] Day 14 - Restroom Redoubt
 - [ ] Day 15 -
 - [ ] Day 16 -
 - [ ] Day 17 -
