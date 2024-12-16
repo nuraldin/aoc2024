@@ -16,6 +16,15 @@ use std::{collections::HashMap, vec};
 
  Part two:
 
+ Everything except the robot is twice as wide.
+ the distances are now measured from the edge of the map to the closest edge of the box in question.
+ These are the rules to making it wider:
+
+  If the tile is #, the new map contains ## instead.
+  If the tile is O, the new map contains [] instead.
+  If the tile is ., the new map contains .. instead.
+  If the tile is @, the new map contains @. instead.
+
  Solution: 
 
 
