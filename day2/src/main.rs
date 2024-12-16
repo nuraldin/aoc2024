@@ -1,5 +1,5 @@
 /*
- Advent of Code 2024 Day 2
+ Advent of Code 2024 Day 2: Red-Nose Reports
 
  Part one:
 
@@ -66,30 +66,27 @@ fn parse_input(is_test: bool) -> Vec<Vec<u32>> {
 }
 
 fn inc_dec_rule(report: Vec<u32>) -> bool {
-    let increasing = report.is_sorted();
-    let mut report_copy = report.clone();
-    report_copy.reverse();
-    let decreasing = report_copy.is_sorted();
+  let increasing = report.is_sorted();
+  let decreasing = report
+    .iter()
+    .rev()
+    .is_sorted();
 
-    // println!("Report {:?} passes the inc_dec_rule?: {}", report, increasing || decreasing);
-    increasing || decreasing
+  // println!("Report {:?} passes the inc_dec_rule?: {}", report, increasing || decreasing);
+  increasing || decreasing
 }
 
 fn differ_rule(report: Vec<u32>) -> bool {
-    let mut pass = true;
+  for idx in 0..report.len() - 1 {
+      let diff = report[idx].abs_diff(report[idx + 1]);
 
-    for idx in 0..report.len() - 1 {
-        let diff = report[idx].abs_diff(report[idx + 1]);
+      if diff < 1 || diff > 3 {
+          return false;
+      }
+  }
 
-        if diff < 1 || diff > 3 {
-            pass = false;
-            break;
-        }
-    }
-
-    // println!("Report {:?} passes the differ rule?: {}", report, pass);
-
-    pass
+  // println!("Report {:?} passes the differ rule?: {}", report, pass);
+  true
 }
 
 fn problem_dampener(report: Vec<u32>) -> bool {

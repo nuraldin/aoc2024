@@ -1,5 +1,5 @@
 /*
- Advent of Code 2024 Day 4 
+ Advent of Code 2024 Day 4: Ceres Search
 
  Part one:
 
@@ -12,33 +12,40 @@
  We need to search this time X-MAS, i.e. the word MAS in a shape of an X.
  It can also be backwards like SAM
 */
-use utils::read_puzzle_input;
+use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
 use regex::Regex;
 
 fn main() {
-  //  println!("The puzzle: {:?}", parse_puzzle())
-  let puzzle = parse_puzzle();
+  let challenge_config = get_challenge_config();
+
+  let puzzle = parse_puzzle(challenge_config.is_test);
 
   let mut words = 0;
   
-  // Uncomment to solve part one
-  // for (line_idx, puzzle_line) in puzzle.iter().enumerate() {
-  //   words += find_horizontal(puzzle_line.clone());
-  //   words += find_vertical(line_idx, puzzle_line.clone(), puzzle.clone());
-  //   words += find_diagonal(line_idx, puzzle_line.clone(), puzzle.clone());
-  // }
-
-  for line_idx in 1..puzzle.len() - 1 {
-    words += find_x_mas(line_idx, puzzle.clone());
+  match challenge_config.part {
+    ChallengePart::One => {
+      for (line_idx, puzzle_line) in puzzle.iter().enumerate() {
+        words += find_horizontal(puzzle_line.clone());
+        words += find_vertical(line_idx, puzzle_line.clone(), puzzle.clone());
+        words += find_diagonal(line_idx, puzzle_line.clone(), puzzle.clone());
+      }
+    },
+    ChallengePart::Two => {
+      for line_idx in 1..puzzle.len() - 1 {
+        words += find_x_mas(line_idx, puzzle.clone());
+      }
+    },
   }
 
   println!("The amount of XMAS in the puzzle is: {:?}", words);
 }
 
-fn parse_puzzle() -> Vec<Vec<char>> {
+fn parse_puzzle(is_test: bool) -> Vec<Vec<char>> {
   let mut puzzle: Vec<Vec<char>> = Vec::new();
 
-  for line in read_puzzle_input("./src/puzzle_input.txt") {
+  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
+
+  for line in read_puzzle_input(file_path) {
     let mut puzzle_line: Vec<char> = Vec::new();
     
     for letter in line.chars() {

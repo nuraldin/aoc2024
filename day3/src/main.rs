@@ -1,5 +1,5 @@
 /*
- Advent of Code 2024 Day 3 
+ Advent of Code 2024 Day 3: Mull it over
 
  Part one:
 
@@ -12,18 +12,28 @@
  Similar to the first but now there are do() and don't() instructions that enable or disables future mul instructions.
  they all start `enabled`
 */
-use utils::{get_challenge_part, read_puzzle_input, ChallengePart};
+use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
 use regex::Regex;
 
 fn main() {
-  
+  let challenge_config = get_challenge_config(); 
 
-  for line in read_puzzle_input("./src/puzzle_input.txt") {
-    match get_challenge_part() {
-      ChallengePart::One => println!("The non corrupted multiplications add up to: {:?}", part_one(line)),
-      ChallengePart::Two => println!("The non corrupted and enabled multiplications add up to: {:?}", part_two(line)),
-    }
+  let memory_line = get_memory_line(challenge_config.is_test);
+
+  match challenge_config.part {
+    ChallengePart::One => println!("The non corrupted multiplications add up to: {:?}", part_one(memory_line)),
+    ChallengePart::Two => println!("The non corrupted and enabled multiplications add up to: {:?}", part_two(memory_line)),
   }
+}
+
+fn get_memory_line(is_test: bool) -> String {
+  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
+
+  for line in read_puzzle_input(file_path) {
+    return line;
+  }  
+
+  unreachable!();
 }
 
 fn part_one(line: String) -> u32 {
@@ -36,7 +46,7 @@ fn part_one(line: String) -> u32 {
 
     result += x * y;
 
-    println!("Found: mul({}, {}) Res: {}", x, y, x * y);
+    // println!("Found: mul({}, {}) Res: {}", x, y, x * y);
   }
 
   result

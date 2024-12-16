@@ -1,5 +1,5 @@
 /*
- Advent of Code 2024 Day 10
+ Advent of Code 2024 Day 16: Reindeer Maze
 
  Part one:
 

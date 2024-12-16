@@ -1,73 +1,80 @@
 /*
- Advent of Code 2024 Day 5 
+ Advent of Code 2024 Day 5: Print Queue
+
+ The puzzle is a set of rules for constructing sleigh launch safety manual .
+ The new pages for the safety manuals must be printed in very specific order.
+ The notation X | Y means that X must be printed at some point before page Y
+ Every line of pages is called an update. That update must be in the order specified by the rules.
 
  Part one:
 
- We have pages of a safety manual. It has page ordering rules and pages to produce the update.
- The first section is a pattern X|Y that means that X must be produced before page number Y, not necessarily immediately before.
- The second section are the page numbers for each update.
- Which updates^re already in the right order?
- The solution is the middle page of each pages number list added up together.
+ Determine the updates that are in the correct order.
+ What do I get if I add up all the middle page numbers of those correctly-ordered updates?
 
  Part two:
 
-*/
-use std::{collections::HashMap, mem::swap};
+ Determine the updates that are incorrectly ordered.
+ Use the ordering rules to rearrange them.
+ Add up the middle page numberes similar to previous part.
 
-use utils::read_puzzle_input;
+ Solution: 
+*/
+use std::collections::HashMap;
+use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
 
 fn main() {
-  let page_updates_list = parse_page_updates_list();
-  let page_rules = parse_page_rules();
+  let challenge_config = get_challenge_config();
 
-  // Uncomment for having the part one results
-  // let mut correct_ordering_updates = Vec::new();
-  // for page_update in page_updates_list {
-  //   if check_rules(page_rules.clone(), page_update.clone()) {
-  //     correct_ordering_updates.push(page_update)
-  //   }
-  // }
+  let (page_ordering_rules, page_updates_list) = parse_input(challenge_config.is_test);
 
+  match challenge_config.part {
+    ChallengePart::One => {
+      let mut correct_ordering_updates = Vec::new();
+      for page_update in page_updates_list {
+        if check_rules(&page_ordering_rules, &page_update) {
+          correct_ordering_updates.push(page_update)
+        }
+      }
 
-  // let mut middle_page_sum = 0;
-  // for correct_update in correct_ordering_updates {
-  //   middle_page_sum += correct_update[correct_update.len() / 2];
-  // }
+      let middle_page_sum = correct_ordering_updates
+        .iter()
+        .fold(0, |accum, correct_update| accum + correct_update[correct_update.len() / 2]);
 
-  // println!("Correct page update middle page sum: {}", middle_page_sum);
+      println!("Correct page update middle page sum: {}", middle_page_sum);
+    },
+    ChallengePart::Two => {
+      let mut corrected_incorrect_ordering_updates = Vec::new();
+      for page_update in page_updates_list {
+        if !check_rules(&page_ordering_rules, &page_update) {
+          corrected_incorrect_ordering_updates.push(correct_incorrect_update(page_update, page_ordering_rules.clone()));
+        }
+      }
 
-  let mut corrected_incorrect_ordering_updates = Vec::new();
-  for page_update in page_updates_list {
-    if !check_rules(page_rules.clone(), page_update.clone()) {
-      corrected_incorrect_ordering_updates.push(correct_incorrect_update(page_update, page_rules.clone()));
-    }
+      let middle_page_sum = corrected_incorrect_ordering_updates
+      .iter()
+      .fold(0, |accum, incorrect_update| accum + incorrect_update[incorrect_update.len() / 2]);
+    
+      println!("Corrected incorrect page update middle page sum: {}", middle_page_sum);
+    },
   }
-
-  let mut middle_page_sum = 0;
-  for incorrect_update in corrected_incorrect_ordering_updates {
-    middle_page_sum += incorrect_update[incorrect_update.len() / 2];
-  }
-
-  println!("Corrected incorrect page update middle page sum: {}", middle_page_sum);
 }
 
-fn parse_page_updates_list() -> Vec<Vec<u32>> {
-  let mut pages_list: Vec<Vec<u32>> = Vec::new();
-
-  for line in read_puzzle_input("./src/puzzle_pages_list.txt") {
-    let pages_line: Vec<u32> = line.split(",").map(|s| s.parse().unwrap()).collect();
-    pages_list.push(pages_line)
-  }
-  
-  // println!("page updates: {:?}", pages_list);
-
-  pages_list
-}
-
-fn parse_page_rules() -> HashMap<u32, Vec<u32>> {
+fn parse_input(is_test: bool) -> (HashMap<u32, Vec<u32>>, Vec<Vec<u32>>) {
   let mut page_rules = HashMap::new();
+  let mut page_updates_list: Vec<Vec<u32>> = Vec::new();
+  
+  let (updates_file_path, rules_file_path) = if is_test {
+    ("./src/example_pages.txt", "./src/example_page_ordering_rules.txt")
+  } else {
+    ("./src/puzzle_pages.txt", "./src/puzzle_page_ordering_rules.txt")
+  };
 
-  for line in read_puzzle_input("./src/puzzle_page_ordering_rules.txt") {
+  for line in read_puzzle_input(updates_file_path) {
+    let pages_line: Vec<u32> = line.split(",").map(|s| s.parse().unwrap()).collect();
+    page_updates_list.push(pages_line)
+  }
+
+  for line in read_puzzle_input(rules_file_path) {
     let page_rules_line: Vec<u32> = line.split("|").map(|s| s.parse().unwrap()).collect();
     
       // Add an element to the array corresponding to a key
@@ -76,25 +83,20 @@ fn parse_page_rules() -> HashMap<u32, Vec<u32>> {
       .push(page_rules_line[1]);            // Append 42 to the array
   }
 
-  // println!("page rules: {:?}", page_rules);
-
-  page_rules
+  (page_rules, page_updates_list)
 }
 
-fn check_rules(page_rules: HashMap<u32, Vec<u32>>, page_update: Vec<u32>) -> bool {
+fn check_rules(page_ordering_rules: &HashMap<u32, Vec<u32>>, page_update: &Vec<u32>) -> bool {
   let mut pass = true;
-  for (page_idx, page) in page_update.iter().enumerate() {
-    let default_vector: Vec<u32> = Vec::new();
-    for rule in page_rules.get(page).unwrap_or_else(|| &default_vector) {
-      if page_update.contains(rule) {
-        let rule_idx = page_update.iter().position(|&page| page == *rule).unwrap();
-        if rule_idx < page_idx {
-          pass = false;
-        }
-      }
 
-      if !pass {
-        break;
+  for (page_idx, page) in page_update.iter().enumerate() {
+    if let Some(ordering_rule) = page_ordering_rules.get(page) {
+      for other_page in ordering_rule {
+        if let Some(other_page_index) = page_update.iter().position(|&page| page == *other_page) {
+          if other_page_index < page_idx {
+            pass = false;
+          }
+        }
       }
     }
 
@@ -103,7 +105,7 @@ fn check_rules(page_rules: HashMap<u32, Vec<u32>>, page_update: Vec<u32>) -> boo
     }
   }
 
-  pass
+  pass 
 }
 
 fn correct_incorrect_update(incorrect_page_update: Vec<u32>, page_rules: HashMap<u32, Vec<u32>>) -> Vec<u32> {
@@ -145,7 +147,7 @@ fn correct_incorrect_update(incorrect_page_update: Vec<u32>, page_rules: HashMap
       }
     }
 
-    if check_rules(page_rules.clone(), corrected_page_update.clone()) {
+    if check_rules(&page_rules, &corrected_page_update) {
       break;
     }
   }
