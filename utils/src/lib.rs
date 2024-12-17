@@ -1,6 +1,7 @@
 use std::env;
 use std::fs::File;
 use std::io::{self, BufRead};
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Coordinate {
@@ -66,6 +67,29 @@ impl Direction {
       Direction::Down => Coordinate { x:  coordinate.x + 1, y:  coordinate.y },
       Direction::Right => Coordinate { x:  coordinate.x, y: coordinate.y + 1 },
       Direction::Left => Coordinate { x:coordinate.x, y: coordinate.y - 1 },
+    }
+  }
+}
+
+pub fn print_coordinate_map(map: &HashMap<Coordinate, char>) {
+  let mut max_x = 0;
+  let mut max_y = 0;
+  for key in map.keys() {
+    max_x = max_x.max(key.x);
+    max_y = max_y.max(key.y);
+  }
+
+  for idx in 0..max_x + 1 {
+    let mut line = Vec::new();
+    for idy in 0..max_y + 1 {
+      let coordinate = Coordinate { x: idx as i32, y: idy as i32};
+      if let Some(item) = map.get(&coordinate) {
+        line.push(item.to_string());
+      }
+    }
+
+    if line.len() > 0 {
+      println!("{}", line.concat())
     }
   }
 }
