@@ -21,6 +21,7 @@
 
  The solutions for both parts are pretty similar, the difference is the added operator. That makes the solution I have make in part two take much time. i.e. it doesn't scale.
  However, it gives the correct solution. The issue is that calculating all possible operator combination and then looping around it is inefficient.
+ I will leave that solution just for historicity but found a recursive solution in internet that I tried to applied and made the part two go from 60s in my 2019 intel mac, to 6s.
 
 */
 use std::collections::HashMap;
@@ -33,8 +34,8 @@ fn main() {
   // println!("Puzzle shape: {:?}", puzzle);
 
   match challenge_config.part {
-    ChallengePart::One => println!("Total calibration result: {:?}", total_calibration_result(puzzle, &["*", "+"])),
-    ChallengePart::Two => println!("Total calibration result: {:?}", total_calibration_result(puzzle, &["*", "+", "||"])),
+    ChallengePart::One => println!("Total calibration result: {:?}", total_calibration_result_recursive(puzzle, &["*", "+"])),
+    ChallengePart::Two => println!("Total calibration result: {:?}", total_calibration_result_recursive(puzzle, &["*", "+", "||"])),
   }
 }
 
@@ -61,6 +62,20 @@ fn total_calibration_result(mut puzzle: HashMap<u64, Vec<u64>>, operators: &[&st
   for (result, numbers) in puzzle.iter_mut() {
     // println!("result: {result}, numbers: {numbers:?}");
     if exists_combination(*result, numbers, operators) {
+      possible_values.push(*result);
+    }
+  }
+
+  // println!("Possible values: {:?}", possible_values);
+
+  possible_values.iter().sum()
+}
+
+fn total_calibration_result_recursive(mut puzzle: HashMap<u64, Vec<u64>>, operators: &[&str]) -> u64 {
+  let mut possible_values = Vec::new();
+
+  for (result, numbers) in puzzle.iter_mut() {
+    if exists_combination_recursive(*result,numbers, operators, 0) {
       possible_values.push(*result);
     }
   }
@@ -146,4 +161,30 @@ fn to_base(base: u32, mut num: u32, digits: usize) -> String {
   }
 
   result
+}
+
+fn exists_combination_recursive(target: u64, mut numbers: &[u64], operators: &[&str], acum: u64) -> bool {
+  if acum > target {
+    return false;
+  }
+
+  if numbers.is_empty() {
+    return target == acum;
+  }
+
+  let (next, rest ) = numbers.split_first().unwrap();
+
+  let mut acums: Vec<u64> = Vec::new();
+  for operator in operators {
+    match *operator {
+      "+" => acums.push(acum + next),
+      "*" => acums.push(acum * next),
+      "||" => acums.push(format!("{}{}", acum, next).parse().unwrap()),
+      _ => unreachable!(),
+    }
+  }
+
+  exists_combination_recursive(target, rest, operators, acums[0]) ||
+  exists_combination_recursive(target, rest, operators, acums[1]) ||
+  (*acums.get(2).unwrap_or(&u64::MAX) != u64::MAX && exists_combination_recursive(target, rest, operators, format!("{}{}", acum, next).parse().unwrap()))
 }
