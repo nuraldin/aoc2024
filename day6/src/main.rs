@@ -15,6 +15,14 @@
 
  Part two:
 
+ How many positons could I put an obstruction and generate an infinite loop?
+
+ Solution:
+
+ The first part was pretty straight-forward with a solution a map of coordinates pointint o map elements.
+ Then the previous iterations were different but after seeing in internet other solutions I used the suggested set for tracking positions of the police.
+ In the second part the tricky part is to realize that the obstruction may have not been if the police started from the beginning, i.e. I was trying to check every time I was moving the police and that made that issue.
+ The correct, but brute force, solution is to check every next position for loops but starting from the police starting position. 
 */
 use std::collections::{HashMap,HashSet};
 use utils::{get_challenge_config, read_puzzle_input, ChallengePart, Coordinate, Direction };
@@ -51,20 +59,22 @@ fn parse_input(is_test: bool) -> (Coordinate, HashMap<Coordinate, char>) {
 }
 
 fn calculate_obstructions(mut police_position: Coordinate, mut puzzle_map: HashMap<Coordinate, char>) -> usize {
-  let mut obstacles = 0;
   let mut police_direction = Direction::Up;
+  let mut obstacle_positions: HashSet<Coordinate> = HashSet::new();
 
+  let initial_police_position = police_position.clone();
+  let initial_police_direction = police_direction.clone();
   let mut possible_position = police_direction.add_delta(&police_position);
   while let Some(item) = puzzle_map.get(&possible_position) {
     if *item == '#' {
       police_direction = police_direction.rotate_right();
     } else {
       let mut clone_map = puzzle_map.clone();
-      if loops(possible_position.clone(), police_position.clone(), police_direction.clone(), &mut clone_map) {
-        obstacles += 1;
+      if loops(possible_position.clone(), initial_police_position.clone(), initial_police_direction.clone(), &mut clone_map) {
+        obstacle_positions.insert(possible_position.clone());
         puzzle_map.insert(possible_position.clone(), 'O');
-        println!("next obstruction -------");
-        print_map(&clone_map);
+        // println!("next obstruction -------");
+        // print_map(&clone_map);
       }
       police_position = possible_position.clone();
     }
@@ -72,14 +82,14 @@ fn calculate_obstructions(mut police_position: Coordinate, mut puzzle_map: HashM
     possible_position = police_direction.add_delta(&police_position);
   }
 
-  print_map(&puzzle_map);
-
-  obstacles
+  // print_map(&puzzle_map);
+  println!("obstacle posibilities: {:?}", obstacle_positions);
+  obstacle_positions.iter().count()
 }
 
 fn loops(obstacle: Coordinate,mut police_position: Coordinate, mut police_direction: Direction, puzzle_map: &mut HashMap<Coordinate, char>) -> bool {
   puzzle_map.insert(obstacle.clone(), '#');
-  police_direction = police_direction.rotate_right(); 
+  // police_direction = police_direction.rotate_right(); 
   let mut visited_positions: HashSet<(Coordinate, Direction)> = HashSet::from([(police_position.clone(), police_direction.clone())]);
   
   let mut possible_position = police_direction.add_delta(&police_position);
