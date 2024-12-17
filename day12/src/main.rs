@@ -1,5 +1,5 @@
 /*
- Advent of Code 2024 Day 12
+ Advent of Code 2024 Day 12: Garden Groups
 
  The input is a map of garden plots. Each garden plot grows a signle type of plant indicated by a single letter on the map.
  The plots form regions (when the same plant is touching horizontally or vertically with another plot)
@@ -21,7 +21,7 @@
  Solution: 
 
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
+use utils::{get_challenge_config, read_puzzle_input, ChallengePart, Coordinate, Direction, TopographicMap};
 
 fn main() {
     let challenge_config = get_challenge_config();
@@ -29,7 +29,7 @@ fn main() {
     let puzzle_map = parse_plots(challenge_config.is_test);
 
     let regions = get_regions(puzzle_map);
-    // println!("regions: {:?}", regions);
+    println!("regions: {:?}", regions);
     
     match challenge_config.part {
       ChallengePart::One => println!("The total price for fencing the regions is: {}", calculate_price(&regions)),
@@ -37,78 +37,64 @@ fn main() {
     }
 }
 
-fn parse_plots(is_test: bool) -> Vec<Vec<Plot>> {
-  let mut plot_map = Vec::new();
+fn parse_plots(is_test: bool) -> TopographicMap<char> {
+  let mut plot_map = TopographicMap::new();
 
   let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
 
-  for (row, pattern) in read_puzzle_input(file_path).enumerate() {
-    let mut plot_row = vec![];
-    for (column, plant) in pattern.chars().enumerate() {
-      plot_row.push(Plot {
-        plant,
-        row,
-        column
-      });
-
+  for (x, plots) in read_puzzle_input(file_path).enumerate() {
+    for (y, plant) in plots.chars().enumerate() {
+      plot_map.insert(Coordinate { x: x as i32, y: y as i32 }, plant);
     }
-    plot_map.push(plot_row);
   }
 
   // println!("Plot map: {:?}", plot_map);
-
   plot_map
-}
-
-#[derive(Debug, Copy, Clone)]
-struct Plot {
-  plant: char,
-    row: usize,
-    column: usize
-}
-
-impl Plot {
-  fn is_adjacent(&self, other_plot: &Plot) -> bool {
-    (self.row as i32 - 1 == other_plot.row as i32 && self.column == other_plot.column) || // is on top of a plot
-    (self.row + 1 == other_plot.row && self.column == other_plot.column) || // is below a plot
-    (self.row == other_plot.row && self.column as i32 - 1 == other_plot.column as i32) || // is to the left of a plot
-    (self.row == other_plot.row && self.column + 1 == other_plot.column) 
-  }
 }
 
 #[derive(Debug, Clone)]
 struct Region {
-  id: usize,
-  plots: Vec<Plot>,
+  plant: char,
+  plots: Vec<Coordinate>,
   area: i32,
   perimeter: i32
 }
 
 impl Region {
+  fn new(plant: char, coordinate: &Coordinate) -> Self {
+    Self {
+      plant: plant,
+      plots: vec![coordinate.clone()],
+      area: 1,
+      perimeter: 4,
+    }
+  }
+
   fn price(&self) -> i32 {
     self.area * self.perimeter
   }
 
-  fn plant(&self) -> char {
-    self.plots[0].plant
-  }
+  fn is_adjacent(&self, coordinate: &Coordinate) -> bool {
+    for direction in Direction::to_vec() {
+      let next = coordinate.add_delta(direction);
 
-  fn contains(&self, plot: &Plot) -> bool {
-    if plot.plant != self.plant() {
-      return false;
+      if self.plots.contains(&next) {
+        return true;
+      } 
     }
-    self.plots.iter().any(|region_plot| region_plot.is_adjacent(plot))
+
+    false
   }
 
-  fn add_plot(&mut self, plot: &Plot) {
+  fn add_plot(&mut self, plot: &Coordinate) {
     let adjacent_plots = self.plots
       .iter()
-      .filter(|region_plot| region_plot.is_adjacent(plot))
+      .filter(|other_plot| other_plot.is_adjacent(plot))
       .count();
 
     self.perimeter += 4 - 2 * adjacent_plots as i32;
     self.area += 1;
-    self.plots.push(*plot);
+    self.plots.push(plot.clone());
     // println!("after adding plot region area: {} region perimeter: {}", self.area, self.perimeter);
   }
 
@@ -119,75 +105,51 @@ impl Region {
   }
 }
 
-fn get_regions(plot_map: Vec<Vec<Plot>>) -> Vec<Region> {
+fn get_regions(plot_map: TopographicMap<char>) -> Vec<Region> {
   let mut regions: Vec<Region> = Vec::new();
 
-  for plot_row in plot_map {
-    let mut adjacent_plots: Vec<Plot> = Vec::new();
+  for (coordinate, plant) in plot_map {
+    // println!("Regions: {:?}", regions);
+    // println!("plant: {plant}, coordinate: {coordinate:?}");
 
-    for plot in plot_row {
-      if adjacent_plots.len() > 0 && adjacent_plots[0].plant != plot.plant {
-        add_new_region(&mut regions, adjacent_plots);
-        adjacent_plots = Vec::new();
-      }
-      
-      let mut new_regions = Vec::new();
-      let mut contained_regions = Vec::new();
-      for region in regions.clone(){
-        if region.contains(&plot) {
-          contained_regions.push(region);
-        } else {
-          new_regions.push(region);
-        }
-      }
-
-      if contained_regions.len() > 0 {
-        let mut new_region = contained_regions[0].clone();
-        new_region.add_plot(&plot);
-        for plot in adjacent_plots {
-          new_region.add_plot(&plot);
-        }
-
-        for idx in 1..contained_regions.len() {
-          new_region.merge_region(&contained_regions[idx]);
-        }
-
-        new_regions.push(new_region);
-        regions = new_regions.clone();
-
-        adjacent_plots = Vec::new();
-      } else {
-        adjacent_plots.push(plot);
-      }
+    if regions.is_empty() {
+      regions.push(Region::new(plant, &coordinate));
+      continue;
     }
-    
-    if adjacent_plots.len() > 0 {
-      add_new_region(&mut regions, adjacent_plots);
+
+    let mut other_regions = Vec::new();
+    let mut adjacent_regions = Vec::new();
+    for region in regions.clone() {
+      if region.plant == plant && region.is_adjacent(&coordinate) {
+        adjacent_regions.push(region.clone());
+      } else {
+        other_regions.push(region.clone());
+      }
+    } 
+
+    if !adjacent_regions.is_empty() {
+      // println!("adjacent regions: {:?}\nother regions: {:?}\n", adjacent_regions, other_regions);
+      let (new_region, rest) = adjacent_regions.split_first_mut().unwrap();
+      new_region.add_plot(&coordinate);
+
+      for region in rest {
+        new_region.merge_region(region);
+      }
+
+      other_regions.push(new_region.clone());
+      regions = other_regions.clone();
+    } else {
+      regions.push(Region::new(plant, &coordinate));
     }
   }
 
   regions
 }
 
-fn add_new_region(regions: &mut Vec<Region>, plots: Vec<Plot>) {
-    let mut new_region = Region {
-        id: regions.len(),
-        area: 0,
-        perimeter: 0,
-        plots: Vec::new()
-      };
-
-    for plot in plots {
-        new_region.add_plot(&plot);
-      }
-
-    regions.push(new_region);
-}
-
 fn calculate_price(regions: &Vec<Region>) -> i32 {
   let mut total_price = 0;
   for region in regions {
-    println!("Region plant: {} area: {} perimeter {}", region.plant(), region.area, region.perimeter);
+    println!("Region plant: {} area: {} perimeter {}", region.plant, region.area, region.perimeter);
     total_price += region.price();
   }
   total_price

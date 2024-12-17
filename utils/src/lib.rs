@@ -3,6 +3,8 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::collections::HashMap;
 
+pub type TopographicMap<T> = HashMap<Coordinate, T>;
+
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Coordinate {
   pub x: i32,
@@ -21,6 +23,18 @@ impl Coordinate {
       Direction::Right => Coordinate { x: self.x,     y: self.y + 1 },
       Direction::Left =>  Coordinate { x: self.x,     y: self.y - 1 },
     }
+  }
+
+  pub fn is_adjacent(&self, coordinate: &Coordinate) -> bool {
+    for direction in Direction::to_vec() {
+      let next = coordinate.add_delta(direction);
+
+      if next == *self {
+        return true; 
+      }
+    }
+
+    false
   }
 }
 
