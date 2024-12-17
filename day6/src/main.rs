@@ -31,105 +31,6 @@ fn main() {
   }
 }
 
-fn calculate_obstructions(mut police_position: Coordinate, mut puzzle_map: HashMap<Coordinate, char>) -> usize {
-  let mut obstacles = 0;
-  let mut police_direction = Direction::Up;
-  let mut possible_position = police_direction.add_delta(&police_position);
-
-  while let Some(item) = puzzle_map.get(&possible_position) {
-    if *item != '#' {
-      if loops(possible_position.clone(), police_position.clone(), police_direction.clone(), puzzle_map.clone()) {
-        obstacles += 1;
-      } 
-    } else if *item == '#' {
-      police_direction = police_direction.rotate_right();
-      possible_position = police_direction.add_delta(&police_position);
-      while *puzzle_map.get(&possible_position).unwrap() == '#' {
-        police_direction = police_direction.rotate_right();
-        possible_position = police_direction.add_delta(&police_position);
-      } 
-    }
-
-    police_position = possible_position.clone();
-    possible_position = police_direction.add_delta(&possible_position);
-
-  }
-
-  obstacles
-}
-
-fn loops(obstacle: Coordinate,mut police_position: Coordinate, mut police_direction: Direction, mut puzzle_map: HashMap<Coordinate, char>) -> bool {
-  let mut cycle: HashSet<(Coordinate,Direction)> = HashSet::new();
-
-  puzzle_map.insert(obstacle.clone(), '#');
-
-  cycle.insert((police_position.clone(), police_direction.clone()));
-  police_direction = police_direction.rotate_right(); 
-  cycle.insert((police_position.clone(), police_direction.clone()));
-  
-  let mut possible_position = police_direction.add_delta(&police_position);
-  while let Some(item) = puzzle_map.get(&possible_position) {
-    if *item == '#' {
-      police_direction = police_direction.rotate_right();
-      possible_position = police_direction.add_delta(&police_position);
-      while *puzzle_map.get(&possible_position).unwrap() == '#' {
-        police_direction = police_direction.rotate_right();
-        possible_position = police_direction.add_delta(&police_position);
-      } 
-    }
-
-    cycle.insert((police_position.clone(), police_direction.clone()));
-    police_position = possible_position.clone();
-    possible_position = police_direction.add_delta(&possible_position);
-
-    if cycle.contains(&(police_position.clone(), police_direction.clone())) {
-      // println!("cycle: {cycle:?}");
-      // println!("cycle contains pol: {police_position:?} dir: {police_direction:?}");
-      return true;
-    }
-  }
-  
-  false
-}
-
-fn calculate_positions(mut police_position: Coordinate, mut puzzle_map: HashMap<Coordinate, char>) -> usize {
-  let mut police_direction = Direction::Up;
-  let mut possible_position = police_direction.add_delta(&police_position);
-
-  while let Some(item) = puzzle_map.get(&possible_position) {
-    if *item == '#' {
-      police_direction = police_direction.rotate_right();
-      possible_position = police_direction.add_delta(&police_position);
-      while *puzzle_map.get(&possible_position).unwrap() == '#' {
-        police_direction = police_direction.rotate_right();
-        possible_position = police_direction.add_delta(&police_position);
-      } 
-    }
-
-    puzzle_map.insert(police_position.clone(), 'X');
-    puzzle_map.insert(possible_position.clone(), police_direction.to_char());
-    police_position = possible_position.clone();
-    possible_position = police_direction.add_delta(&possible_position);
-  }
-
-  puzzle_map.values().filter(|&item| *item == 'X' ).count() + 1
-}
-
-fn get_next_possible_direction(direction: Direction, position: &Coordinate, puzzle_map: &HashMap<Coordinate, char>) -> Direction {
-  // println!("found obstacle at {possible_position:?} police will rotate and calculate possible next position");
-  let mut direction = direction.rotate_right();
-  let mut possible_position = direction.add_delta(&position);
-  // println!("After rotation, next possible position is: {possible_position:?}");
-  while *puzzle_map.get(&possible_position).unwrap() == '#' {
-    // println!("found obstacle at {possible_position:?} police will rotate and calculate possible next position");
-    direction = direction.rotate_right();
-    possible_position = direction.add_delta(&position);
-    // println!("After rotation, next possible position is: {possible_position:?}");
-  } 
-
-  direction
-}
-
 fn parse_input(is_test: bool) -> (Coordinate, HashMap<Coordinate, char>) {
   let mut puzzle_map = HashMap::new();
   let mut police_start_coordinate = Coordinate { x: 0, y: 0 };
@@ -149,10 +50,92 @@ fn parse_input(is_test: bool) -> (Coordinate, HashMap<Coordinate, char>) {
   (police_start_coordinate, puzzle_map)
 }
 
+fn calculate_obstructions(mut police_position: Coordinate, mut puzzle_map: HashMap<Coordinate, char>) -> usize {
+  let mut obstacles = 0;
+  let mut police_direction = Direction::Up;
+
+  let mut possible_position = police_direction.add_delta(&police_position);
+  while let Some(item) = puzzle_map.get(&possible_position) {
+    if *item == '#' {
+      police_direction = police_direction.rotate_right();
+    } else {
+      let mut clone_map = puzzle_map.clone();
+      if loops(possible_position.clone(), police_position.clone(), police_direction.clone(), &mut clone_map) {
+        obstacles += 1;
+        puzzle_map.insert(possible_position.clone(), 'O');
+        println!("next obstruction -------");
+        print_map(&clone_map);
+      }
+      police_position = possible_position.clone();
+    }
+    
+    possible_position = police_direction.add_delta(&police_position);
+  }
+
+  print_map(&puzzle_map);
+
+  obstacles
+}
+
+fn loops(obstacle: Coordinate,mut police_position: Coordinate, mut police_direction: Direction, puzzle_map: &mut HashMap<Coordinate, char>) -> bool {
+  puzzle_map.insert(obstacle.clone(), '#');
+  police_direction = police_direction.rotate_right(); 
+  let mut visited_positions: HashSet<(Coordinate, Direction)> = HashSet::from([(police_position.clone(), police_direction.clone())]);
+  
+  let mut possible_position = police_direction.add_delta(&police_position);
+  while let Some(item) = puzzle_map.get(&possible_position) {
+    //println!("next possible positon: {possible_position:?} direction: {police_direction:?} item: {item} visited positions: {visited_positions:?}");
+    if *item == '#' {
+      police_direction = police_direction.rotate_right();
+      // visited_positions.insert((police_position.clone(), police_direction.clone()));
+    } else {
+      visited_positions.insert((police_position.clone(), police_direction.clone()));
+      puzzle_map.insert(police_position, 'X');
+      police_position = possible_position.clone();
+    }
+    
+    if visited_positions.contains(&(police_position.clone(), police_direction.clone())) {
+      return true;
+    }
+
+    // println!("visited_positions: {visited_positions:?}");
+    possible_position = police_direction.add_delta(&police_position);
+  }
+
+  false
+}
+
+fn calculate_positions(mut police_position: Coordinate, mut puzzle_map: HashMap<Coordinate, char>) -> usize {
+  let mut police_direction = Direction::Up;
+  let mut visited_positions: HashSet<Coordinate> = HashSet::from([police_position.clone()]);
+
+  let mut possible_position = police_direction.add_delta(&police_position);
+  while let Some(item) = puzzle_map.get(&possible_position) {
+    if *item == '#' {
+      police_direction = police_direction.rotate_right();
+    } else {
+      police_position = possible_position.clone();
+      visited_positions.insert(police_position.clone());
+    }
+    
+    possible_position = police_direction.add_delta(&police_position);
+  }
+
+  visited_positions.len()
+}
+
+
 fn print_map(map: &HashMap<Coordinate, char>) {
-  for idx in 0..map.len() {
+  let mut max_x = 0;
+  let mut max_y = 0;
+  for key in map.keys() {
+    max_x = max_x.max(key.x);
+    max_y = max_y.max(key.y);
+  }
+
+  for idx in 0..max_x + 1 {
     let mut line = Vec::new();
-    for idy in 0..map.len() {
+    for idy in 0..max_y + 1 {
       let coordinate = Coordinate { x: idx as i32, y: idy as i32};
       if let Some(item) = map.get(&coordinate) {
         line.push(item.to_string());
