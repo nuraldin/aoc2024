@@ -16,7 +16,7 @@
  Part two:
 
 */
-use std::collections::HashMap;
+use std::collections::{HashMap,HashSet};
 use utils::{get_challenge_config, read_puzzle_input, ChallengePart, Coordinate, Direction };
 
 fn main() {
@@ -38,11 +38,8 @@ fn calculate_obstructions(mut police_position: Coordinate, mut puzzle_map: HashM
 
   while let Some(item) = puzzle_map.get(&possible_position) {
     if *item != '#' {
-      println!("Checking if it loops");
       if loops(possible_position.clone(), police_position.clone(), police_direction.clone(), puzzle_map.clone()) {
         obstacles += 1;
-        println!("is  obstacle!");
-        puzzle_map.insert(possible_position.clone(), 'O');
       } 
     } else if *item == '#' {
       police_direction = police_direction.rotate_right();
@@ -53,48 +50,43 @@ fn calculate_obstructions(mut police_position: Coordinate, mut puzzle_map: HashM
       } 
     }
 
-    puzzle_map.insert(police_position.clone(), '.');
-    puzzle_map.insert(possible_position.clone(), police_direction.to_char());
     police_position = possible_position.clone();
     possible_position = police_direction.add_delta(&possible_position);
 
   }
 
-  println!("possible position: {possible_position:?}");
   obstacles
 }
 
 fn loops(obstacle: Coordinate,mut police_position: Coordinate, mut police_direction: Direction, mut puzzle_map: HashMap<Coordinate, char>) -> bool {
+  let mut cycle: HashSet<(Coordinate,Direction)> = HashSet::new();
+
   puzzle_map.insert(obstacle.clone(), '#');
 
+  cycle.insert((police_position.clone(), police_direction.clone()));
   police_direction = police_direction.rotate_right(); 
+  cycle.insert((police_position.clone(), police_direction.clone()));
+  
   let mut possible_position = police_direction.add_delta(&police_position);
-
   while let Some(item) = puzzle_map.get(&possible_position) {
-    println!("pos: {possible_position:?}, pol: {police_position:?}, dir: {police_direction:?}");
-    if possible_position == obstacle {
-      // println!("There was a loop here:");
-      // print_map(&puzzle_map);
-      return true;
-    }
-
     if *item == '#' {
       police_direction = police_direction.rotate_right();
       possible_position = police_direction.add_delta(&police_position);
       while *puzzle_map.get(&possible_position).unwrap() == '#' {
         police_direction = police_direction.rotate_right();
         possible_position = police_direction.add_delta(&police_position);
-
-        if possible_position == obstacle {
-          // println!("There was a loop here:");
-          // print_map(&puzzle_map);
-          return true;
-        }
       } 
     }
 
+    cycle.insert((police_position.clone(), police_direction.clone()));
     police_position = possible_position.clone();
     possible_position = police_direction.add_delta(&possible_position);
+
+    if cycle.contains(&(police_position.clone(), police_direction.clone())) {
+      // println!("cycle: {cycle:?}");
+      // println!("cycle contains pol: {police_position:?} dir: {police_direction:?}");
+      return true;
+    }
   }
   
   false
