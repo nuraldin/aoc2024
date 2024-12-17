@@ -13,6 +13,15 @@ impl Coordinate {
   pub fn is_outside_boundaries(&self, max: (i32, i32)) -> bool {
     (self.x < 0 || self.y < 0) || (self.x >= max.0 || self.y >= max.1 )
   }
+
+  pub fn add_delta(&self, direction: Direction) -> Coordinate {
+    match direction {
+      Direction::Up =>    Coordinate { x: self.x - 1,  y: self.y },
+      Direction::Down =>  Coordinate { x: self.x + 1, y: self.y },
+      Direction::Right => Coordinate { x: self.x,     y: self.y + 1 },
+      Direction::Left =>  Coordinate { x: self.x,     y: self.y - 1 },
+    }
+  }
 }
 
 #[derive(Clone, PartialEq, Debug, Eq, Hash)]
@@ -68,6 +77,11 @@ impl Direction {
       Direction::Right => Coordinate { x:  coordinate.x, y: coordinate.y + 1 },
       Direction::Left => Coordinate { x:coordinate.x, y: coordinate.y - 1 },
     }
+  }
+
+  pub fn to_vec() -> Vec<Direction> {
+    let directions = [Direction::Up,  Direction::Down, Direction::Left, Direction::Right];
+    directions.to_vec()
   }
 }
 

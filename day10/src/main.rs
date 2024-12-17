@@ -14,7 +14,7 @@
  now the result is the number of distinct hiking trails which begin at a certain trailhead.
  aka doesn't mattter if it arrives to hte same 9, just how many ways it has to reach to 9s
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengeConfig, ChallengePart};
+use utils::{get_challenge_config, read_puzzle_input, ChallengeConfig, ChallengePart, Coordinate, Direction};
 
 fn main() {
     let challenge_config = get_challenge_config();
@@ -37,12 +37,6 @@ fn parse_input(config: &ChallengeConfig) -> TopographicMap {
   }
 
   topographic_map
-}
-
-#[derive(Debug, PartialEq)]
-struct Location {
-  x: i32,
-  y: i32,
 }
 
 fn trailheads_score(topographic_map: TopographicMap) -> usize {
@@ -69,13 +63,13 @@ fn trailheads_ratings(topographic_map: TopographicMap) -> usize {
   trailheads_ratings
 }
 
-fn get_trailheads(topographic_map: &TopographicMap) -> Vec<Location> {
+fn get_trailheads(topographic_map: &TopographicMap) -> Vec<Coordinate> {
   let mut trailheads = Vec::new();
 
   for (row_idx, row) in topographic_map.iter().enumerate() {
     for (col_idx, col) in row.iter().enumerate() {
       if *col == '0' {
-        trailheads.push(Location { x: col_idx as i32, y: row_idx as i32})
+        trailheads.push(Coordinate { x: col_idx as i32, y: row_idx as i32})
       }
     }
   } 
@@ -83,7 +77,7 @@ fn get_trailheads(topographic_map: &TopographicMap) -> Vec<Location> {
   trailheads
 }
 
-fn get_trailhead_score(trailhead: &Location, topographic_map: &TopographicMap) -> usize {
+fn get_trailhead_score(trailhead: &Coordinate, topographic_map: &TopographicMap) -> usize {
   let mut hiking_trails = Vec::new();
   get_hiking_trails_end_locations(trailhead, topographic_map, &mut hiking_trails, true); 
   // println!("Unique Hiking trails ending locations: {:?}", hiking_trails);
@@ -91,7 +85,7 @@ fn get_trailhead_score(trailhead: &Location, topographic_map: &TopographicMap) -
   hiking_trails.iter().count()
 }
 
-fn get_trailhead_rating(trailhead: &Location, topographic_map: &TopographicMap) -> usize {
+fn get_trailhead_rating(trailhead: &Coordinate, topographic_map: &TopographicMap) -> usize {
   let mut hiking_trails = Vec::new();
   get_hiking_trails_end_locations(trailhead, topographic_map, &mut hiking_trails, false); 
   // println!("Hiking trails ending locations: {:?}", hiking_trails);
@@ -99,18 +93,17 @@ fn get_trailhead_rating(trailhead: &Location, topographic_map: &TopographicMap) 
   hiking_trails.iter().count()
 }
 
-fn is_location_outbounds(location: &Location, topographic_map: &TopographicMap) -> bool {
-  location.x >= topographic_map.len() as i32 || location.x < 0 || location.y >= topographic_map[0].len() as i32 || location.y < 0
-}
+fn get_hiking_trails_end_locations(location: &Coordinate, topographic_map: &TopographicMap, hiking_trails: &mut Vec<Coordinate>, unique: bool) {
+  let max_x = topographic_map.len() as i32;
+  let max_y = topographic_map[0].len() as i32;
 
-fn get_hiking_trails_end_locations(location: &Location, topographic_map: &TopographicMap, hiking_trails: &mut Vec<Location>, unique: bool) {
-  if is_location_outbounds(location, topographic_map) {
+  if location.is_outside_boundaries((max_x, max_y)) {
     return;
   }
 
   if topographic_map[location.y as usize][location.x as usize] == '9' {
     if !unique || !hiking_trails.iter().any(|item| item == location ) {
-      hiking_trails.push(Location { x: location.x, y: location.y });
+      hiking_trails.push(Coordinate { x: location.x, y: location.y });
     }
   }
 
@@ -119,58 +112,31 @@ fn get_hiking_trails_end_locations(location: &Location, topographic_map: &Topogr
   }
 } 
 
-fn get_next_possible_locations(location: &Location, topographic_map: &TopographicMap) -> Vec<Location> {
-  let mut next_possible_locations = Vec::new();
+fn get_next_possible_locations(location: &Coordinate, topographic_map: &TopographicMap) -> Vec<Coordinate> {
+  let mut next_locations = Vec::new();
+  
+  let max_x = topographic_map.len() as i32;
+  let max_y = topographic_map[0].len() as i32;
 
-  let left = Location { 
-    x: location.x - 1,
-    y: location.y
-  };
-
-  let right = Location { 
-    x: location.x + 1,
-    y: location.y
-  };
-
-  let up = Location { 
-    x: location.x,
-    y: location.y - 1
-  };
-
-  let down = Location { 
-    x: location.x,
-    y: location.y + 1,
-  };
-
-  // can I go up?
-  if !is_location_outbounds(&up, topographic_map) && !is_wall(&up, topographic_map) &&is_evenly_higher(&up, location, topographic_map) {
-    next_possible_locations.push(up);
-  }
-  // can I go up?
-  if !is_location_outbounds(&down, topographic_map) && !is_wall(&down, topographic_map) && is_evenly_higher(&down, location, topographic_map) {
-    next_possible_locations.push(down);
-  }
-  // can I go up?
-  if !is_location_outbounds(&left, topographic_map) && !is_wall(&left, topographic_map) && is_evenly_higher(&left, location, topographic_map) {
-    next_possible_locations.push(left);
-  }
-  // can I go up?
-  if !is_location_outbounds(&right, topographic_map) && !is_wall(&right, topographic_map) && is_evenly_higher(&right, location, topographic_map) {
-    next_possible_locations.push(right);
+  for direction in Direction::to_vec() {
+    let next_location = location.add_delta(direction);
+    if location.is_outside_boundaries((max_x, max_y)) && !is_wall(&next_location, topographic_map) && is_evenly_higher(&next_location, location, topographic_map) {
+      next_locations.push(next_location)
+    }
   }
 
   // println!("current location: {:?}, next possible locations: {:?}", location, next_possible_locations);
-  next_possible_locations
+  next_locations
 }
 
-fn is_evenly_higher(next_location: &Location, current_location: &Location, topographic_map: &TopographicMap) -> bool {
+fn is_evenly_higher(next_location: &Coordinate, current_location: &Coordinate, topographic_map: &TopographicMap) -> bool {
   let next_location = topographic_map[next_location.y as usize][next_location.x as usize].to_digit(10).unwrap() as i32;
   let current_location = topographic_map[current_location.y as usize][current_location.x as usize].to_digit(10).unwrap() as i32;
 
   next_location - current_location == 1 
 }
 
-fn is_wall(next_location: &Location, topographic_map: &TopographicMap) -> bool {
+fn is_wall(next_location: &Coordinate, topographic_map: &TopographicMap) -> bool {
   let next_location = topographic_map[next_location.y as usize][next_location.x as usize];
 
   next_location == '.'

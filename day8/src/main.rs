@@ -12,7 +12,7 @@
  The antinodes can happen also in positions of other antennas and infinitely
 
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengeConfig, ChallengePart};
+use utils::{get_challenge_config, read_puzzle_input, ChallengeConfig, ChallengePart, Coordinate};
 
 fn main() {
   let challenge_config = get_challenge_config();
@@ -38,16 +38,10 @@ struct AntennaPair {
   right: Antenna
 }
 
-#[derive(Debug, Clone, PartialEq)]
-struct Location {
-  row: i32,
-  col: i32,
-}
-
 #[derive(Debug, Clone)]
 struct Antenna {
   frequency: char,
-  location: Location,
+  location: Coordinate,
 }
 
 fn parse_input(config: &ChallengeConfig) -> Puzzle {
@@ -61,7 +55,7 @@ fn parse_input(config: &ChallengeConfig) -> Puzzle {
 
     for (col_idx, item) in line.chars().enumerate() {
       if item != '.' {
-        antennas.push(Antenna { frequency: item, location: Location { row: row_idx as i32, col: col_idx as i32 }})
+        antennas.push(Antenna { frequency: item, location: Coordinate { x: row_idx as i32, y: col_idx as i32 }})
       }
     }
   }
@@ -94,7 +88,7 @@ fn get_antenna_pairs(antennas: &Vec<Antenna>) -> Vec<AntennaPair>{
   antenna_pairs
 }
 
-fn get_antenna_pairs_antinodes(map_size: i32, antenna_pairs: &Vec<AntennaPair>, is_super: bool) -> Vec<Location> {
+fn get_antenna_pairs_antinodes(map_size: i32, antenna_pairs: &Vec<AntennaPair>, is_super: bool) -> Vec<Coordinate> {
   let mut antinodes = Vec::new();
 
   for antenna_pair in antenna_pairs {
@@ -111,9 +105,9 @@ fn get_antenna_pairs_antinodes(map_size: i32, antenna_pairs: &Vec<AntennaPair>, 
       } 
     }
 
-    let mut next_antinode_location = Location { 
-      row: antenna_pair.left.location.row + antenna_pair_distance.row, 
-      col: antenna_pair.left.location.col + antenna_pair_distance.col
+    let mut next_antinode_location = Coordinate { 
+      x: antenna_pair.left.location.x + antenna_pair_distance.x, 
+      y: antenna_pair.left.location.y + antenna_pair_distance.y
     };
     while !is_location_outbounds(&next_antinode_location, map_size) {
       if !antinodes.contains(&next_antinode_location) {
@@ -124,15 +118,15 @@ fn get_antenna_pairs_antinodes(map_size: i32, antenna_pairs: &Vec<AntennaPair>, 
         break;
       }
 
-      next_antinode_location = Location { 
-        row: next_antinode_location.row + antenna_pair_distance.row, 
-        col: next_antinode_location.col + antenna_pair_distance.col
+      next_antinode_location = Coordinate { 
+        x: next_antinode_location.x + antenna_pair_distance.x, 
+        y: next_antinode_location.y + antenna_pair_distance.y
       };
     } 
 
-    let mut next_antinode_location = Location { 
-      row: antenna_pair.right.location.row - antenna_pair_distance.row, 
-      col: antenna_pair.right.location.col - antenna_pair_distance.col
+    let mut next_antinode_location = Coordinate { 
+      x: antenna_pair.right.location.x - antenna_pair_distance.x, 
+      y: antenna_pair.right.location.y - antenna_pair_distance.y
     };
     while !is_location_outbounds(&&next_antinode_location, map_size) {
       if !antinodes.contains(&next_antinode_location) {
@@ -143,9 +137,9 @@ fn get_antenna_pairs_antinodes(map_size: i32, antenna_pairs: &Vec<AntennaPair>, 
         break;
       }
 
-      next_antinode_location = Location { 
-        row: next_antinode_location.row - antenna_pair_distance.row, 
-        col: next_antinode_location.col - antenna_pair_distance.col
+      next_antinode_location = Coordinate { 
+        x: next_antinode_location.x - antenna_pair_distance.x, 
+        y: next_antinode_location.y - antenna_pair_distance.y
       };
     } 
   }
@@ -153,16 +147,16 @@ fn get_antenna_pairs_antinodes(map_size: i32, antenna_pairs: &Vec<AntennaPair>, 
   antinodes
 }
 
-fn get_antenna_pair_distance(antenna_pair: &AntennaPair) -> Location {
+fn get_antenna_pair_distance(antenna_pair: &AntennaPair) -> Coordinate {
   let left_antenna = &antenna_pair.left;
   let right_antenna = &antenna_pair.right;
 
-  Location {
-    row: left_antenna.location.row - right_antenna.location.row,
-    col: left_antenna.location.col - right_antenna.location.col,
+  Coordinate {
+    x: left_antenna.location.x - right_antenna.location.x,
+    y: left_antenna.location.y - right_antenna.location.y,
   }
 }
 
-fn is_location_outbounds(location: &Location, map_size: i32) -> bool {
-  location.row >= map_size|| location.row < 0 || location.col >= map_size || location.col < 0
+fn is_location_outbounds(location: &Coordinate, map_size: i32) -> bool {
+  location.x >= map_size|| location.x < 0 || location.y >= map_size || location.y < 0
 }

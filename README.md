@@ -14,12 +14,12 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [x] Day 3 - Mull it over
 - [x] Day 4 - Ceres search
 - [x] Day 5 - Print queue
-- [ ] Day 6 - Guard gallivant
-- [ ] Day 7 - Bridge repair
+- [x] Day 6 - Guard gallivant
+- [x] Day 7 - Bridge repair
 - [x] Day 8 - Resonant collinearity
 - [x] Day 9 - Disk fragmenter
 - [x] Day 10 - Hoof it
-- [ ] Day 11 - Plutonian Pebbles
+- [x] Day 11 - Plutonian Pebbles
 - [ ] Day 12 - Garden Groups
 - [x] Day 13 - Claw Contraption 
 - [x] Day 14 - Restroom Redoubt

@@ -9,10 +9,17 @@
  The `price` of fence required for a region is found by multiplying the region are by its perimeter.
  The `total price` of fencing all regions is the sum of all fence price of every region.
 
-
  Part one:
 
+ What is the total price of fencing all regions on your map?
+
  Part two:
+
+ To calculate the perimeter this time you use the sides of each region has.
+ What would be the new total price?
+
+ Solution: 
+
 */
 use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
 
@@ -56,8 +63,8 @@ fn parse_plots(is_test: bool) -> Vec<Vec<Plot>> {
 #[derive(Debug, Copy, Clone)]
 struct Plot {
   plant: char,
-  row: usize,
-  column: usize
+    row: usize,
+    column: usize
 }
 
 impl Plot {
