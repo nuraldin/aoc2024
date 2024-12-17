@@ -2,6 +2,74 @@ use std::env;
 use std::fs::File;
 use std::io::{self, BufRead};
 
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct Coordinate {
+  pub x: i32,
+  pub y: i32,
+}
+
+impl Coordinate {
+  pub fn is_outside_boundaries(&self, max: (i32, i32)) -> bool {
+    (self.x < 0 || self.y < 0) || (self.x >= max.0 || self.y >= max.1 )
+  }
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub enum Direction {
+  Up,
+  Left,
+  Right,
+  Down,
+}
+
+impl Direction {
+  pub fn from_char(char: char) -> Direction {
+    match char { 
+      '^' => Direction::Up,
+      '<' => Direction::Left,
+      '>' => Direction::Right,
+      'v' => Direction::Down ,
+      _ => panic!("Cannot transform into a Direction type"),
+    }
+  }
+
+  pub fn to_char(&self) -> char {
+    match self { 
+      Direction::Up => '^', 
+      Direction::Right => '>',
+      Direction::Down => 'v',
+      Direction::Left => '<',
+    }
+  }
+
+  pub fn rotate_right(&self) -> Direction {
+    match self { 
+      Direction::Up => Direction::Right, 
+      Direction::Right => Direction::Down,
+      Direction::Down => Direction::Left,
+      Direction::Left => Direction::Up,
+    }
+  }
+
+  pub fn delta(&self) -> Coordinate {
+    match self {
+      Direction::Up => Coordinate { x: -1, y:  0 },
+      Direction::Down => Coordinate { x:  1, y:  0 },
+      Direction::Right => Coordinate { x:  0, y:  1 },
+      Direction::Left => Coordinate { x:  0, y: -1 },
+    }
+  }
+
+  pub fn add_delta(&self, coordinate: &Coordinate) -> Coordinate {
+    match self {
+      Direction::Up => Coordinate { x: coordinate.x -1, y: coordinate.y },
+      Direction::Down => Coordinate { x:  coordinate.x + 1, y:  coordinate.y },
+      Direction::Right => Coordinate { x:  coordinate.x, y: coordinate.y + 1 },
+      Direction::Left => Coordinate { x:coordinate.x, y: coordinate.y - 1 },
+    }
+  }
+}
+
 pub fn read_puzzle_input(file_path: &str) -> impl Iterator<Item = String> {
     let file: File = File::open(file_path).expect("Couldn't open specified file");
     let reader = io::BufReader::new(file);
