@@ -20,6 +20,12 @@
 
  Solution: 
 
+ For the first solutions I map the input into a hashmap of coordinates and plants. From this one I start creating regions and merging existing ones if necessary.
+ For the second part found a solution in internet that made me realize I just had to check for each element its four corners.
+ if any corner is an inner or outer edge you add up a point, as the sum of all edges is the number of sides in a polygon.
+ That made the calculation easy. Still the first part of making the regions is not very performant but it works. 
+ It is not performant specially because I'm trying to merge regions every time I check for an item and that is costly.
+
 */
 use utils::{get_challenge_config, read_puzzle_input, ChallengePart, Coordinate, Direction, TopographicMap};
 
@@ -29,11 +35,11 @@ fn main() {
     let puzzle_map = parse_plots(challenge_config.is_test);
 
     let regions = get_regions(puzzle_map);
-    println!("regions: {:?}", regions);
+    // println!("regions: {:?}", regions);
     
     match challenge_config.part {
-      ChallengePart::One => println!("The total price for fencing the regions is: {}", calculate_price(&regions)),
-      ChallengePart::Two => println!("Not implemented yet"),
+      ChallengePart::One => println!("The total price for fencing the regions is: {}", calculate_price(&regions, challenge_config.part)),
+      ChallengePart::Two => println!("The total price for fencing the regions with discount is: {}", calculate_price(&regions, challenge_config.part)),
     }
 }
 
@@ -57,13 +63,13 @@ struct Region {
   plant: char,
   plots: Vec<Coordinate>,
   area: i32,
-  perimeter: i32
+  perimeter: i32,
 }
 
 impl Region {
   fn new(plant: char, coordinate: &Coordinate) -> Self {
     Self {
-      plant: plant,
+      plant,
       plots: vec![coordinate.clone()],
       area: 1,
       perimeter: 4,
@@ -74,9 +80,27 @@ impl Region {
     self.area * self.perimeter
   }
 
+  fn price_with_discount(&self) -> i32 {
+    self.area * self.sides()
+  }
+
+  fn sides(&self) -> i32 {
+    let mut sides = 0;
+
+    for plot in &self.plots {
+      let surrounding_plots = get_surrounding_plots(plot.clone(), &self.plots);
+      sides += get_side_delta(plot.clone(), &surrounding_plots);
+    }
+
+    // println!("plant: {}, plots: {:?}, sides: {}", self.plant, self.plots, sides);
+
+
+    sides
+  }
+
   fn is_adjacent(&self, coordinate: &Coordinate) -> bool {
     for direction in Direction::to_vec() {
-      let next = coordinate.add_delta(direction);
+      let next = coordinate.add_delta(&direction);
 
       if self.plots.contains(&next) {
         return true;
@@ -95,7 +119,6 @@ impl Region {
     self.perimeter += 4 - 2 * adjacent_plots as i32;
     self.area += 1;
     self.plots.push(plot.clone());
-    // println!("after adding plot region area: {} region perimeter: {}", self.area, self.perimeter);
   }
 
   fn merge_region(&mut self, other_region: &Region) {
@@ -146,11 +169,48 @@ fn get_regions(plot_map: TopographicMap<char>) -> Vec<Region> {
   regions
 }
 
-fn calculate_price(regions: &Vec<Region>) -> i32 {
+fn calculate_price(regions: &Vec<Region>, challenge_part: ChallengePart) -> i32 {
   let mut total_price = 0;
   for region in regions {
-    println!("Region plant: {} area: {} perimeter {}", region.plant, region.area, region.perimeter);
-    total_price += region.price();
+    // println!("Region plant: {} area: {} perimeter: {}  sides: {}", region.plant, region.area, region.perimeter, region.sides());
+    total_price += match challenge_part {
+      ChallengePart::One => region.price(),
+      ChallengePart::Two => region.price_with_discount(),
+    }
   }
   total_price
+}
+
+fn get_surrounding_plots(plot: Coordinate, other_plots: &Vec<Coordinate>) -> Vec<Coordinate> {
+  let deltas = [
+    (0,1),    // right
+    (0, -1),  // left
+    (1,0),   // down
+    (-1, 0),  // up
+    (1, 1),    // diagonal down right
+    (1, -1), // diagonal down left
+    (-1,-1),  // diagonal up left
+    (-1, 1),  // diagonal up right
+  ];
+
+  let mut surrounding_plot = vec![];
+  for delta in deltas {
+    let next_coordinate = Coordinate { x: plot.x + delta.0, y: plot.y + delta.1 };
+    if other_plots.contains(&next_coordinate) && next_coordinate != plot {
+      surrounding_plot.push(next_coordinate);
+    }
+  }
+
+  surrounding_plot
+}
+
+fn get_side_delta(plot: Coordinate, surrounding_plots: &Vec<Coordinate>) -> i32 {
+  let mut corners = 0;
+  for corner in [Direction::UpRight, Direction::UpLeft, Direction::DownLeft, Direction::DownRight] {
+    if plot.is_outer_edge(&corner, &surrounding_plots) || plot.is_inner_edge(&corner, &surrounding_plots) {
+      corners += 1;
+    }
+  }
+
+  corners
 }

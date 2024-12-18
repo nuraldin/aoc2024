@@ -16,18 +16,22 @@ impl Coordinate {
     (self.x < 0 || self.y < 0) || (self.x >= max.0 || self.y >= max.1 )
   }
 
-  pub fn add_delta(&self, direction: Direction) -> Coordinate {
+  pub fn add_delta(&self, direction: &Direction) -> Coordinate {
     match direction {
-      Direction::Up =>    Coordinate { x: self.x - 1,  y: self.y },
-      Direction::Down =>  Coordinate { x: self.x + 1, y: self.y },
-      Direction::Right => Coordinate { x: self.x,     y: self.y + 1 },
-      Direction::Left =>  Coordinate { x: self.x,     y: self.y - 1 },
+      Direction::Up =>        Coordinate { x: self.x - 1, y: self.y },
+      Direction::Down =>      Coordinate { x: self.x + 1, y: self.y },
+      Direction::Right =>     Coordinate { x: self.x,     y: self.y + 1 },
+      Direction::Left =>      Coordinate { x: self.x,     y: self.y - 1 },
+      Direction::UpRight =>   Coordinate { x: self.x - 1, y: self.y + 1},
+      Direction::UpLeft =>    Coordinate { x: self.x - 1, y: self.y - 1},
+      Direction::DownRight => Coordinate { x: self.x + 1, y: self.y + 1},
+      Direction::DownLeft =>  Coordinate { x: self.x + 1, y: self.y - 1},
     }
   }
 
   pub fn is_adjacent(&self, coordinate: &Coordinate) -> bool {
     for direction in Direction::to_vec() {
-      let next = coordinate.add_delta(direction);
+      let next = coordinate.add_delta(&direction);
 
       if next == *self {
         return true; 
@@ -35,6 +39,78 @@ impl Coordinate {
     }
 
     false
+  }
+
+  pub fn is_diagonal(&self, coordinate: &Coordinate) -> bool {
+    for direction in Direction::get_diagonals() {
+      let next = coordinate.add_delta(&direction);
+
+      if next == *self {
+        return true;
+      }
+    }
+
+    false
+  }
+
+  pub fn get_direction(&self, coordinate: &Coordinate) -> Option<Direction> {
+    for direction in Direction::get_diagonals() {
+      let next = coordinate.add_delta(&direction);
+
+      if next == *self {
+        return Option::from(direction);
+      }
+    }
+
+    Option::None
+  }
+
+  pub fn is_outer_edge(&self, direction: &Direction, surrounding_coordinates: &Vec<Coordinate>) -> bool {
+    match direction {
+      Direction::DownLeft => {
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::Left)) && 
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::Down))
+      },
+      Direction::DownRight => {
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::Down)) && 
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::Right))
+      },
+      Direction::UpRight => {
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::Up)) && 
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::Right))
+      },
+      Direction::UpLeft => {
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::Up)) && 
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::Left))
+      },
+      _ => unreachable!()
+    }
+  }
+
+  pub fn is_inner_edge(&self, direction: &Direction, surrounding_coordinates: &Vec<Coordinate>) -> bool {
+    match direction {
+      Direction::DownLeft => {
+        surrounding_coordinates.contains(&self.add_delta(&Direction::Left)) && 
+        surrounding_coordinates.contains(&self.add_delta(&Direction::Down)) &&
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::DownLeft))
+      },
+      Direction::DownRight => {
+        surrounding_coordinates.contains(&self.add_delta(&Direction::Down)) && 
+        surrounding_coordinates.contains(&self.add_delta(&Direction::Right)) &&
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::DownRight))
+      },
+      Direction::UpRight => {
+        surrounding_coordinates.contains(&self.add_delta(&Direction::Up)) && 
+        surrounding_coordinates.contains(&self.add_delta(&Direction::Right)) &&
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::UpRight))
+      },
+      Direction::UpLeft => {
+        surrounding_coordinates.contains(&self.add_delta(&Direction::Up)) && 
+        surrounding_coordinates.contains(&self.add_delta(&Direction::Left)) &&
+        !surrounding_coordinates.contains(&self.add_delta(&Direction::UpLeft))
+      },
+      _ => unreachable!()
+    }
   }
 }
 
@@ -44,6 +120,10 @@ pub enum Direction {
   Left,
   Right,
   Down,
+  DownLeft,
+  DownRight,
+  UpRight,
+  UpLeft
 }
 
 impl Direction {
@@ -63,6 +143,7 @@ impl Direction {
       Direction::Right => '>',
       Direction::Down => 'v',
       Direction::Left => '<',
+      _ => unreachable!()
     }
   }
 
@@ -72,6 +153,7 @@ impl Direction {
       Direction::Right => Direction::Down,
       Direction::Down => Direction::Left,
       Direction::Left => Direction::Up,
+      _ => unreachable!()
     }
   }
 
@@ -81,6 +163,7 @@ impl Direction {
       Direction::Down => Coordinate { x:  1, y:  0 },
       Direction::Right => Coordinate { x:  0, y:  1 },
       Direction::Left => Coordinate { x:  0, y: -1 },
+      _ => unreachable!()
     }
   }
 
@@ -90,11 +173,17 @@ impl Direction {
       Direction::Down => Coordinate { x:  coordinate.x + 1, y:  coordinate.y },
       Direction::Right => Coordinate { x:  coordinate.x, y: coordinate.y + 1 },
       Direction::Left => Coordinate { x:coordinate.x, y: coordinate.y - 1 },
+      _ => unreachable!()
     }
   }
 
   pub fn to_vec() -> Vec<Direction> {
     let directions = [Direction::Up,  Direction::Down, Direction::Left, Direction::Right];
+    directions.to_vec()
+  }
+
+  pub fn get_diagonals() -> Vec<Direction> {
+    let directions = [Direction::UpRight,  Direction::DownRight, Direction::DownLeft, Direction::UpLeft];
     directions.to_vec()
   }
 }
@@ -113,10 +202,12 @@ pub fn print_coordinate_map(map: &HashMap<Coordinate, char>) {
       let coordinate = Coordinate { x: idx as i32, y: idy as i32};
       if let Some(item) = map.get(&coordinate) {
         line.push(item.to_string());
+      } else {
+        line.push(" ".to_string());
       }
     }
 
-    if line.len() > 0 {
+    if line.len() > 0 && !line.iter().all(|c| c == " "){
       println!("{}", line.concat())
     }
   }
