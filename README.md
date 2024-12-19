@@ -20,13 +20,13 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [x] Day 9 - Disk fragmenter
 - [x] Day 10 - Hoof it
 - [x] Day 11 - Plutonian Pebbles
-- [ ] Day 12 - Garden Groups
+- [X] Day 12 - Garden Groups
 - [x] Day 13 - Claw Contraption 
 - [x] Day 14 - Restroom Redoubt
 - [ ] Day 15 - Warehouse Woes
 - [ ] Day 16 - Reindeer Maze
-- [ ] Day 17 -
-- [ ] Day 18 -
+- [ ] Day 17 - Chronospatial Computer
+- [ ] Day 18 - RAM run
 - [ ] Day 19 -
 - [ ] Day 20 -
 - [ ] Day 21 -
