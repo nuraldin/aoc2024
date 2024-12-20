@@ -12,6 +12,10 @@ pub struct Coordinate {
 }
 
 impl Coordinate {
+  pub fn new(x: i32, y: i32) -> Self {
+    Self { x, y }
+  }
+
   pub fn is_outside_boundaries(&self, max: (i32, i32)) -> bool {
     (self.x < 0 || self.y < 0) || (self.x >= max.0 || self.y >= max.1 )
   }

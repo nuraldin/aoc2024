@@ -41,7 +41,7 @@
  between numbers that are increasing in powers of 8 fashion, that is shifting 3 times. The best way is to reverse the calculation starting from hte last printed value
  collect all possible A values that would produce that and then shift each of them 3 times and see the next 7 possible values.
  That makes it super fast.
- 
+
 */
 use std::collections::HashMap;
 use regex::Regex;
@@ -58,10 +58,7 @@ fn main() {
         computer.run_program();
         println!("The output of the program is: {:?}", computer.flush());
       }
-      ChallengePart::Two => {
-        computer.run_until_copy();
-        println!("The lowest possible value of A that casues a program to output a copy of itself is: {}", computer.registers[&Register::A]);
-      }
+      ChallengePart::Two => println!("The lowest possible value of A that casues a program t o output a copy of itself is: {}", computer.run_until_copy())
     }
 }
 
@@ -220,9 +217,7 @@ impl Computer {
 
     // Returns the value of register A that satisfies the output buffer to be equal to the program condition
     // This version is about going from the end to the beginning;
-    fn run_until_copy(&mut self) {
-      // let init_number =  0x132_621_633;
-      // 7431600132621633
+    fn run_until_copy(&mut self) -> u64 {
       let pattern = [0b000, 0b001, 0b010, 0b011, 0b100, 0b101, 0b110, 0b111].to_vec();
       let mut possible_numbers = pattern.clone();
       let mut compared = 0;
@@ -239,8 +234,8 @@ impl Computer {
           self.registers.insert(Register::A,*next_number);
           self.run_program();
           
-          println!("next_number: {next_number:o}");
-          println!("buf: {:?}", self.output_buffer);
+          // println!("next_number: {next_number:o}");
+          // println!("buf: {:?}", self.output_buffer);
 
           let (_, last) = self.program.split_at(self.program.len() - self.output_buffer.len());
           if self.output_buffer == last {
@@ -249,15 +244,9 @@ impl Computer {
         }
         
         if self.output_buffer.len() == self.program.len() {
-          self.registers.insert(Register::A, **successful.iter().min().unwrap());
-          break;
+          return **successful.iter().min().unwrap();
         }
 
-        println!("suc: {:?}", successful.iter().map(|n| format!("{:o}", n)).collect::<Vec<String>>());
-        if successful.len() == 0 {
-          break;
-        }
-        
         let mut next_possible_numbers = vec![];
         for pos_n in &pattern {
           for suc_n in &successful {
@@ -265,7 +254,7 @@ impl Computer {
           }
         }
         possible_numbers = next_possible_numbers.clone();
-        println!("next pos n: {:?}", possible_numbers.iter().map(|n| format!("{:o}", n)).collect::<Vec<String>>());
+        // println!("next pos n: {:?}", possible_numbers.iter().map(|n| format!("{:o}", n)).collect::<Vec<String>>());
       }
     }
 }
@@ -366,11 +355,11 @@ mod tests {
     assert_eq!("4,6,3,5,6,3,5,2,1,0", computer.flush());
   }
 
-  // #[test]
-  // fn run_until_copy_with_example_input() {
-  //   let mut computer = Computer::new();
-  //   computer.program = [0, 3, 5, 4, 3, 0].to_vec();
+  #[test]
+  fn run_until_copy_with_example_input() {
+    let mut computer = Computer::new();
+    computer.program = [0, 3, 5, 4, 3, 0].to_vec();
 
-  //   assert_eq!(computer.run_until_copy(), 117440);
-  // }
+    assert_eq!(computer.run_until_copy(), 117440);
+  }
 }
