@@ -1,7 +1,3 @@
-use core::net;
-use std::{collections::HashMap, fmt::Binary};
-
-use regex::Regex;
 /*
  Advent of Code 2024 Day 17: Chronospatial Computer
 
@@ -38,7 +34,17 @@ use regex::Regex;
 
  What is the lowest possible initial value for register A that causes the program to output a copy of itself?
 
+ Solution:
+
+ for part one I just needed to setup the operations and a computer and run the program. The part two was tricky.
+ Brute forcing for part two was not possible, so seeing other solutions and thinking about it it was clear that the number of A is just just the lowest possible 
+ between numbers that are increasing in powers of 8 fashion, that is shifting 3 times. The best way is to reverse the calculation starting from hte last printed value
+ collect all possible A values that would produce that and then shift each of them 3 times and see the next 7 possible values.
+ That makes it super fast.
+ 
 */
+use std::collections::HashMap;
+use regex::Regex;
 use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
 
 fn main() {
@@ -54,7 +60,7 @@ fn main() {
       }
       ChallengePart::Two => {
         computer.run_until_copy();
-        println!("The lowest possible value of A that casues a program to output a copy of itself is: ");
+        println!("The lowest possible value of A that casues a program to output a copy of itself is: {}", computer.registers[&Register::A]);
       }
     }
 }
@@ -212,47 +218,56 @@ impl Computer {
     self.registers.insert(Register::C,0);
   }
 
-  // Returns the value of register A that satisfies the output buffer to be equal to the program condition
-  fn run_until_copy(&mut self) {
-    let pattern: Vec<u64> = [0b000, 0b001, 0b010, 0b011, 0b100, 0b101, 0b110, 0b111].to_vec();
-    let mut next_numbers = pattern.clone();
-    let mut current_min = 0;
-    let mut shift = 0;
+    // Returns the value of register A that satisfies the output buffer to be equal to the program condition
+    // This version is about going from the end to the beginning;
+    fn run_until_copy(&mut self) {
+      // let init_number =  0x132_621_633;
+      // 7431600132621633
+      let pattern = [0b000, 0b001, 0b010, 0b011, 0b100, 0b101, 0b110, 0b111].to_vec();
+      let mut possible_numbers = pattern.clone();
+      let mut compared = 0;
+  
+      loop {
+        let mut successful = Vec::new();
 
-    'outer: loop {
-      let mut possible_next_numbers = vec![];
-      
-      for next_number in next_numbers.clone() {
-        if next_number == 0 {
-          continue;
-        }
-        self.reset();
-        self.registers.insert(Register::A,next_number);
-        self.run_program();
+        for next_number in &possible_numbers {
+          if compared == 0 && *next_number == 0 {
+            compared += 1;
+            continue;
+          }
+          self.reset();
+          self.registers.insert(Register::A,*next_number);
+          self.run_program();
+          
+          println!("next_number: {next_number:o}");
+          println!("buf: {:?}", self.output_buffer);
 
-        let (_, last) = self.program.split_at(self.program.len() - self.output_buffer.len());
-        if self.output_buffer[..self.output_buffer.len()] == *last {
-          possible_next_numbers.push(next_number);
-          println!("output buffer: {:?}, program: {:?}, last: {:?}", self.output_buffer, self.program, last);
-          if self.output_buffer.len() == self.program.len() {
-            break 'outer;
+          let (_, last) = self.program.split_at(self.program.len() - self.output_buffer.len());
+          if self.output_buffer == last {
+            successful.push(next_number);
           }
         }
+        
+        if self.output_buffer.len() == self.program.len() {
+          self.registers.insert(Register::A, **successful.iter().min().unwrap());
+          break;
+        }
+
+        println!("suc: {:?}", successful.iter().map(|n| format!("{:o}", n)).collect::<Vec<String>>());
+        if successful.len() == 0 {
+          break;
+        }
+        
+        let mut next_possible_numbers = vec![];
+        for pos_n in &pattern {
+          for suc_n in &successful {
+            next_possible_numbers.push((*suc_n << 3 ) + pos_n);
+          }
+        }
+        possible_numbers = next_possible_numbers.clone();
+        println!("next pos n: {:?}", possible_numbers.iter().map(|n| format!("{:o}", n)).collect::<Vec<String>>());
       }
-
-
-      let next_min = possible_next_numbers.iter().fold(u64::MAX, |acum , n| if *n < acum { *n } else { acum });
-      current_min = if next_min != u64::MAX { 
-        current_min.max(next_min)
-      } else { 
-        current_min 
-      };
-      shift += 1; 
-
-      next_numbers = pattern.iter().map(|n| (current_min << (3 * shift)) + n).collect();
-      println!("min: {current_min}, possible_next_numbers: {:?}, next_numbers: {:?} shift: {shift}", possible_next_numbers, next_numbers);
     }
-  }
 }
 
 fn parse_input(is_test: bool) -> Computer  {

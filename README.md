@@ -25,7 +25,7 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [x] Day 14 - Restroom Redoubt
 - [ ] Day 15 - Warehouse Woes
 - [ ] Day 16 - Reindeer Maze
-- [ ] Day 17 - Chronospatial Computer
+- [x] Day 17 - Chronospatial Computer
 - [ ] Day 18 - RAM run
 - [ ] Day 19 -
 - [ ] Day 20 -
