@@ -28,9 +28,9 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [x] Day 17 - Chronospatial Computer
 - [ ] Day 18 - RAM run
 - [ ] Day 19 -
-- [ ] Day 20 -
+- [ ] Day 20 - Race Condition
 - [ ] Day 21 -
 - [ ] Day 22 -
-- [ ] Day 23 -
+- [ ] Day 23 - LAN Party
 - [ ] Day 24 -
 - [ ] Day 25 -

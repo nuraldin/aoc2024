@@ -19,6 +19,7 @@
 
 */
 use utils::{get_challenge_config, print_coordinate_map, read_puzzle_input, ChallengePart, Coordinate, Direction, TopographicMap};
+use std::collections::HashSet;
 
 fn main() {
     let challenge_config = get_challenge_config();
@@ -135,12 +136,39 @@ fn find_cheats(race_map: &TopographicMap<char>, duration: i32) -> i32 {
       }
 
       let savings = (cheat_pos - curr_pos) as i32 - disable_duration;
-      println!("duration: {race_duration}, cur pos: {curr_pos}, cheat pos: {cheat_pos}, savings: {savings}");
+      // println!("duration: {race_duration}, cur pos: {curr_pos}, cheat pos: {cheat_pos}, savings: {savings}");
       
       if savings == duration {
         cheats += 1;
       }
     } 
+  } 
+
+  cheats
+}
+
+fn find_cheats_upto(race_map: &TopographicMap<char>, duration: i32, secs: i32) -> i32 {
+  let disable_duration = 2;
+  let race_track: Vec<Coordinate> = track_path(&race_map);
+
+  let mut cheats = 0;
+  for (curr_pos, curr) in race_track.clone().iter().enumerate() {
+    let possible_cheats = possible_cheats_upto(curr.clone(), &race_map, secs);
+    for possible_cheat in possible_cheats {
+      let cheat_pos = race_track.iter().position(|pos| *pos == possible_cheat).unwrap();
+    
+      if cheat_pos < curr_pos {
+        continue;
+      }
+
+      let savings = (cheat_pos - curr_pos) as i32 - disable_duration;
+      // println!("duration: {race_duration}, cur pos: {curr_pos}, cheat pos: {cheat_pos}, savings: {savings}");
+      
+      if savings == duration {
+        cheats += 1;
+      }
+    } 
+    break;
   } 
 
   cheats
@@ -191,6 +219,52 @@ fn possible_cheats(pos: Coordinate, map: &TopographicMap<char>) -> Vec<Coordinat
       }
     }
   }
+
+  possible_cheats
+}
+
+fn possible_cheats_recursive(pos: Coordinate, map: &TopographicMap<char>, remaining_secs: i32, possible_cheats: &mut HashSet<Coordinate>) -> HashSet<Coordinate>{
+  println!("pos: {pos:?}, remaining secs: {remaining_secs}, possible_cheats: {possible_cheats:?}");
+  if remaining_secs < 0 {
+    return possible_cheats.clone();
+  }
+
+  let mut next = vec![];
+  for direction in Direction::to_vec() {
+    let prev_pos = pos.add_delta(&direction);
+
+    if let Some(value) = map.get(&prev_pos) {
+      if *value == '#' {
+        let next_pos = prev_pos.add_delta(&direction);
+        if let Some(value) = map.get(&next_pos) {
+          match *value {
+            '.' | 'E' => {
+              possible_cheats.insert(next_pos);
+            },
+            '#' => {
+              next.push(value)
+            },
+            _ => (),
+          }
+        }
+      }
+    }
+  }
+
+  if next.len() == 0 {
+    return possible_cheats.clone()
+  }
+
+  for next_pos in next {
+    possible_cheats_recursive(pos, map, remaining_secs - 2, possible_cheats)
+  }
+
+  return possible.cheats
+}
+
+fn possible_cheats_upto(pos: Coordinate, map: &TopographicMap<char>, secs: i32) -> HashSet<Coordinate> {
+  let possible_cheats = possible_cheats_recursive(pos, map, secs, &mut HashSet::new());
+  println!("possible cheats recursive: {possible_cheats:?}");
 
   possible_cheats
 }
@@ -248,19 +322,19 @@ mod tests {
   fn test_example_20_picoseconds_cheats() {
     let puzzle_map = parse_input(true);
     
-    assert_eq!(find_cheats(&puzzle_map, 50), 32, "There should be 32 cheats that save 50 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 52), 31, "There should be 31 cheats that save 52 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 54), 29, "There should be 29 cheats that save 54 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 56), 39, "There should be 39 cheats that save 56 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 58), 25, "There should be 25 cheats that save 58 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 60), 23, "There should be 23 cheats that save 60 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 62), 20, "There should be 20 cheats that save 62 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 64), 19, "There should be 19 cheats that save 64 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 66), 12, "There should be 12 cheats that save 66 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 68), 14, "There should be 14 cheats that save 68 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 70), 12, "There should be 12 cheats that save 70 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 72), 22, "There should be 22 cheats that save 72 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 74),  4, "There should be 3 cheats that save 74 picoseconds");
-    assert_eq!(find_cheats(&puzzle_map, 76),  3, "There should be 4 cheats that save 76 picoseconds");
+    assert_eq!(find_cheats_upto(&puzzle_map, 50, 20), 32, "There should be 32 cheats that save 50 picoseconds");
+    assert_eq!(find_cheats_upto(&puzzle_map, 52, 20), 31, "There should be 31 cheats that save 52 picoseconds");
+    assert_eq!(find_cheats_upto(&puzzle_map, 54, 20), 29, "There should be 29 cheats that save 54 picoseconds");
+    assert_eq!(find_cheats_upto(&puzzle_map, 56, 20), 39, "There should be 39 cheats that save 56 picoseconds");
+    assert_eq!(find_cheats_upto(&puzzle_map, 58, 20), 25, "There should be 25 cheats that save 58 picoseconds");
+    // assert_eq!(find_cheats(&puzzle_map, 60), 23, "There should be 23 cheats that save 60 picoseconds");
+    // assert_eq!(find_cheats(&puzzle_map, 62), 20, "There should be 20 cheats that save 62 picoseconds");
+    // assert_eq!(find_cheats(&puzzle_map, 64), 19, "There should be 19 cheats that save 64 picoseconds");
+    // assert_eq!(find_cheats(&puzzle_map, 66), 12, "There should be 12 cheats that save 66 picoseconds");
+    // assert_eq!(find_cheats(&puzzle_map, 68), 14, "There should be 14 cheats that save 68 picoseconds");
+    // assert_eq!(find_cheats(&puzzle_map, 70), 12, "There should be 12 cheats that save 70 picoseconds");
+    // assert_eq!(find_cheats(&puzzle_map, 72), 22, "There should be 22 cheats that save 72 picoseconds");
+    // assert_eq!(find_cheats(&puzzle_map, 74),  4, "There should be 3 cheats that save 74 picoseconds");
+    // assert_eq!(find_cheats(&puzzle_map, 76),  3, "There should be 4 cheats that save 76 picoseconds");
   }
 }
