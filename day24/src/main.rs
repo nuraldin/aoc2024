@@ -18,13 +18,6 @@ use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
 
 use std::collections::HashMap;
 
-#[derive(Debug)]
-struct Wire {
-  value: WireState,
-  label: String
-}
-
-
 #[derive(Debug, PartialEq)]
 enum WireState {
   One,
@@ -33,6 +26,13 @@ enum WireState {
 }
 
 impl WireState {
+  fn to_string(&self) -> String {
+    match self {
+      WireState::None => "None".to_string(),
+      WireState::One => "1".to_string(),
+      WireState::Zero => "0".to_string()
+    }
+  }
   /// Returns the numerical value of the wire or None. Useful for arithmetic operations
   fn to_val(&self) -> i32 {
     match self {
@@ -43,8 +43,16 @@ impl WireState {
   }
 
   /// Transforms a numerical value to the Wire enum.
-  fn to_enum(val: i32) -> WireState {
-    if val > 0 { WireState::One } else { WireState::Zero }
+  fn from_int(v: i32) -> WireState {
+    if v > 0 { WireState::One } else { WireState::Zero }
+  }
+
+  fn from_str(v: &str) -> WireState {
+    match v {
+      "0" => WireState::Zero,
+      "1" => WireState::One,
+      _ => panic!("Cannot parse {v} into a wire state")
+    }
   }
 }
 
@@ -76,33 +84,42 @@ impl LogicalOp {
 
 #[derive(Debug)]
 struct Gate {
-  inputs: (Wire, Wire),
-  output: Wire,
+  inputs: (String, String),
+  output: String,
   operation: LogicalOp
 }
 
 impl Gate {
-  fn can_operate(&self) -> bool {
-    self.inputs.0.value != WireState::None && self.inputs.1.value != WireState::None  
+  fn can_operate(&self, wire_states: &HashMap<String, WireState>) -> bool {
+    let input_a = wire_states.get(&self.inputs.0).unwrap();
+    let input_b = wire_states.get(&self.inputs.1).unwrap();
+
+    *input_a != WireState::None && *input_b != WireState::None  
   }
 
-  fn process_output(&mut self) {
-    if !self.can_operate() {
-      panic!("One of the inputs is not ready to operate for gate with inputs: {} {}", self.inputs.0.label, self.inputs.1.label)
+  fn has_operated(&self, wire_states: &HashMap<String, WireState>) -> bool {
+    let output = wire_states.get(&self.output).unwrap();
+
+    *output != WireState::None
+  }
+
+  fn process_output(&mut self, wire_states: &mut HashMap<String, WireState>) {
+    if !self.can_operate(&wire_states) {
+      panic!("One of the inputs is not ready to operate for gate with inputs: {} {}", self.inputs.0, self.inputs.1)
     }
 
     let result = self.operation.calculate(
-      self.inputs.0.value.to_val(),
-      self.inputs.1.value.to_val(), 
+      wire_states.get(&self.inputs.0).unwrap().to_val(),
+      wire_states.get(&self.inputs.1).unwrap().to_val(), 
     );
 
-    self.output.value = WireState::to_enum(result);
+    wire_states.insert(self.output.clone(), WireState::from_int(result));
   }
 }
 
 #[derive(Debug)]
 struct SystemConfig {
-  wires: HashMap<String, Wire>,
+  wires: HashMap<String, WireState>,
   gates: Vec<Gate>,
 }
 
@@ -112,6 +129,24 @@ impl SystemConfig {
       wires: HashMap::new(),
       gates: vec![]
     }
+  }
+
+  fn print_outputs(&self) {
+    let mut outputs: Vec<(String, String)> = self.wires.iter().filter_map(|(label, state)| {
+      if label.starts_with("z") {
+        return Some((label.clone(), state.to_string()));
+      }
+      None
+    }).collect();
+
+    outputs.sort();
+    outputs.reverse();
+    
+    println!("raw collection: {outputs:?}");
+
+    let outputs: Vec<String> = outputs.iter().map(|(_, value)| value.clone()).collect();
+    println!("binary: {}", outputs.concat());
+    println!("decimal: {}", u64::from_str_radix(&outputs.concat(), 2).unwrap())
   }
 }
 
@@ -126,11 +161,29 @@ fn parse_input(is_test: bool) -> SystemConfig {
 
   // get inputs starting configuration
   for inputs_line in read_puzzle_input(inputs_file) {
+    let parsed_line: Vec<&str> = inputs_line.split(": ").collect();
 
+    let wire_label = parsed_line[0].to_string();
+    let wire_state = WireState::from_str(parsed_line[1]);
+
+    system_config.wires.insert(wire_label, wire_state);
   }
 
   // get gates configuration 
   for gates_line in read_puzzle_input(gates_file) {
+    let parsed_line: Vec<&str> = gates_line.split(" ").collect();
+
+    let input_a= parsed_line[0].to_string();
+    let input_b = parsed_line[2].to_string();  
+    let output = parsed_line[4].to_string();
+
+    system_config.gates.push(Gate {
+      inputs: (input_a, input_b),
+      output: output.clone(),
+      operation: LogicalOp::from(parsed_line[1]),
+    });
+
+    system_config.wires.entry(output).or_insert(WireState::None);
 
   } 
 
@@ -140,11 +193,20 @@ fn parse_input(is_test: bool) -> SystemConfig {
 fn main() {
     let challenge_config = get_challenge_config();
 
-    let system_config = parse_input(challenge_config.is_test);
-    println!("sysem config: {system_config:?}");
-    
+    let mut system_config = parse_input(challenge_config.is_test);
+
     match challenge_config.part {
-      ChallengePart::One => println!("Not implemented yet"),
+      ChallengePart::One => {
+        while system_config.wires.iter().any(|(label, state)| label.starts_with("z") && *state == WireState::None ) {
+          for gate in &mut system_config.gates {
+            if gate.can_operate(&system_config.wires) && !gate.has_operated(&system_config.wires) {
+              gate.process_output(&mut system_config.wires);
+            }
+          }
+        }
+        system_config.print_outputs();
+      
+      },
       ChallengePart::Two => println!("Not implemented yet"),
     }
 }
