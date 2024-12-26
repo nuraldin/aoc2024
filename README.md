@@ -12,13 +12,13 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [x] Day 1 - Historian Hysteria
 - [x] Day 2 - Red-Nose Reports
 - [x] Day 3 - Mull it over
-- [x] Day 4 - Ceres search
-- [x] Day 5 - Print queue
-- [x] Day 6 - Guard gallivant
-- [x] Day 7 - Bridge repair
-- [x] Day 8 - Resonant collinearity
-- [x] Day 9 - Disk fragmenter
-- [x] Day 10 - Hoof it
+- [x] Day 4 - Ceres Search
+- [x] Day 5 - Print Queue
+- [x] Day 6 - Guard Gallivant
+- [x] Day 7 - Bridge Repair
+- [x] Day 8 - Resonant Collinearity
+- [x] Day 9 - Disk Fragmenter
+- [x] Day 10 - Hoof It
 - [x] Day 11 - Plutonian Pebbles
 - [X] Day 12 - Garden Groups
 - [x] Day 13 - Claw Contraption 
@@ -27,10 +27,10 @@ In order to run the examples the easy way you'll need to have `cargo` installed.
 - [ ] Day 16 - Reindeer Maze
 - [x] Day 17 - Chronospatial Computer
 - [ ] Day 18 - RAM run
-- [ ] Day 19 -
+- [ ] Day 19 - Linen Layout
 - [ ] Day 20 - Race Condition
-- [ ] Day 21 -
-- [ ] Day 22 -
+- [ ] Day 21 - Keypad Conundrum
+- [ ] Day 22 - Monkey Market
 - [ ] Day 23 - LAN Party
-- [ ] Day 24 -
-- [ ] Day 25 -
+- [ ] Day 24 - Crossed Wires
+- [ ] Day 25 - Code Chronicle

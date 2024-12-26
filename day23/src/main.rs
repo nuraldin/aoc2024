@@ -81,6 +81,7 @@ fn find_connections_with_computers_starting_with(networks: Vec<HashSet<String>>,
   amount
 }
 
+// it finds the connections of the computer with length n
 fn find_connections(computers: &mut Vec<(String, HashSet<String>)>) -> Vec<HashSet<String>> {
   let mut connected_computers: Vec<HashSet<String>> = Vec::new();
 
