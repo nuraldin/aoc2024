@@ -18,11 +18,11 @@
  How many cheats would save me at least 100 picoseconds?
 
 */
-use utils::{get_challenge_config, print_coordinate_map, read_puzzle_input, ChallengePart, Coordinate, Direction, TopographicMap};
+use utils::{ChallengeConfig, print_coordinate_map, read_puzzle_input, ChallengePart, Coordinate, Direction, TopographicMap};
 use std::collections::HashSet;
 
 fn main() {
-    let challenge_config = get_challenge_config();
+    let challenge_config = ChallengeConfig::get();
 
     let race_map = parse_input(challenge_config.is_test);
     // print_coordinate_map(&race_map);

@@ -25,10 +25,10 @@
  The correct, but brute force, solution is to check every next position for loops but starting from the police starting position. 
 */
 use std::collections::{HashMap,HashSet};
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart, Coordinate, Direction };
+use utils::{ChallengeConfig, read_puzzle_input, ChallengePart, Coordinate, Direction };
 
 fn main() {
-  let challenge_config = get_challenge_config();
+  let challenge_config = ChallengeConfig::get(();
 
   let (police_position, puzzle_map) = parse_input(challenge_config.is_test);
   // println!("puzzle: {:?}", puzzle);

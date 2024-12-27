@@ -14,10 +14,10 @@
  It is needed to calculate the similarity score which tis the number of the left column times the times it appears on the right.
  All added together for each element of the left list.
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 
 fn main() {
-    let challenge_config = get_challenge_config();
+    let challenge_config = ChallengeConfig::get(();
 
     let (mut column1, mut column2) = parse_puzzle_input(challenge_config.is_test);
 

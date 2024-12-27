@@ -29,7 +29,7 @@ use std::{collections::HashMap, vec};
 
 
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 struct Coordinate {
@@ -38,7 +38,7 @@ struct Coordinate {
 }
 
 fn main() {
-    let challenge_config = get_challenge_config();
+    let challenge_config = ChallengeConfig::get(();
 
     let (robot, puzzle_map, instructions) = parse_puzzle_input(challenge_config.is_test);
     

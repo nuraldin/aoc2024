@@ -25,10 +25,10 @@
 
 */
 use std::collections::HashMap;
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 
 fn main() {
-  let challenge_config = get_challenge_config();
+  let challenge_config = ChallengeConfig::get(();
 
   let puzzle = parse_input(challenge_config.is_test);
   // println!("Puzzle shape: {:?}", puzzle);

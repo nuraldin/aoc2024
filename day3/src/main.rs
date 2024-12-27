@@ -12,11 +12,11 @@
  Similar to the first but now there are do() and don't() instructions that enable or disables future mul instructions.
  they all start `enabled`
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 use regex::Regex;
 
 fn main() {
-  let challenge_config = get_challenge_config(); 
+  let challenge_config = ChallengeConfig::get((); 
 
   let memory_line = get_memory_line(challenge_config.is_test);
 

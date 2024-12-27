@@ -5,10 +5,10 @@
 
  Part two:
 */
-use utils::{get_challenge_config, ChallengePart};
+use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
-    let challenge_config = get_challenge_config();
+    let challenge_config = ChallengeConfig::get(();
     
     match challenge_config.part {
       ChallengePart::One => println!("Not implemented yet"),

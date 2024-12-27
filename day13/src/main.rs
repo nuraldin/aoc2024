@@ -21,11 +21,11 @@
  For this challenge I used linear programming to solve for one of the tokens variables. Even though I started trying to brute force by checking each button a and b token combination that satisfied the equation.
  I then restorted to the math approach for part tow as it wouldn't have scaled previous algorithm.
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 use regex::Regex;
 
 fn main() {
-    let challenge_config = get_challenge_config();
+    let challenge_config = ChallengeConfig::get(();
     
     let parsed_input = parse_input(challenge_config.is_test);
 

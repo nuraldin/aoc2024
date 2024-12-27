@@ -28,10 +28,10 @@ use regex::Regex;
 
  In general, the idea is to calculate using modulus arithmetic the possition after n secodns of the robots and multiply the robots of each quadrant. That worked initially but my heuristic for finding the christmas tree didn't.n
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 
 fn main() {
-    let challenge_config = get_challenge_config();
+    let challenge_config = ChallengeConfig::get(();
     
     let robot_list = parse_robot_list(challenge_config.is_test);
     // println!("robot_list: {robot_list:?}");

@@ -12,11 +12,11 @@
  We need to search this time X-MAS, i.e. the word MAS in a shape of an X.
  It can also be backwards like SAM
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 use regex::Regex;
 
 fn main() {
-  let challenge_config = get_challenge_config();
+  let challenge_config = ChallengeConfig::get(();
 
   let puzzle = parse_puzzle(challenge_config.is_test);
 

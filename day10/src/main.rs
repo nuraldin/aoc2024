@@ -14,10 +14,10 @@
  now the result is the number of distinct hiking trails which begin at a certain trailhead.
  aka doesn't mattter if it arrives to hte same 9, just how many ways it has to reach to 9s
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengeConfig, ChallengePart, Coordinate, Direction};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengeConfig, ChallengePart, Coordinate, Direction};
 
 fn main() {
-    let challenge_config = get_challenge_config();
+    let challenge_config = ChallengeConfig::get(();
     
     let topographic_map = parse_input(&challenge_config);
 

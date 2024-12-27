@@ -12,10 +12,10 @@
  The antinodes can happen also in positions of other antennas and infinitely
 
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengeConfig, ChallengePart, Coordinate};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengeConfig, ChallengePart, Coordinate};
 
 fn main() {
-  let challenge_config = get_challenge_config();
+  let challenge_config = ChallengeConfig::get(();
   let puzzle = parse_input(&challenge_config);
 
   // println!("Puzzle shape: {:?}", puzzle);

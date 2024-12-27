@@ -15,10 +15,10 @@
  If removing the bad level makes the report safe, then it is counted as safe.
  With the same rules as before
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 
 fn main() {
-  let challenge_config = get_challenge_config();
+  let challenge_config = ChallengeConfig::get(();
 
   let reports = parse_input(challenge_config.is_test);
   let mut safe_reports: u32 = 0;

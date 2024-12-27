@@ -27,10 +27,10 @@
  It is not performant specially because I'm trying to merge regions every time I check for an item and that is costly.
 
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart, Coordinate, Direction, TopographicMap};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengePart, Coordinate, Direction, TopographicMap};
 
 fn main() {
-    let challenge_config = get_challenge_config();
+    let challenge_config = ChallengeConfig::get(();
 
     let puzzle_map = parse_plots(challenge_config.is_test);
 

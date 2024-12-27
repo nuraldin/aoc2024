@@ -14,7 +14,7 @@
 
  Part two:
 */
-use utils::{get_challenge_config, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 
 use std::collections::HashMap;
 
@@ -191,7 +191,7 @@ fn parse_input(is_test: bool) -> SystemConfig {
 }
 
 fn main() {
-    let challenge_config = get_challenge_config();
+    let challenge_config = ChallengeConfig::get(();
 
     let mut system_config = parse_input(challenge_config.is_test);
 
