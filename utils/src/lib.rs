@@ -217,12 +217,7 @@ pub fn print_coordinate_map(map: &HashMap<Coordinate, char>) {
   }
 }
 
-pub fn read_puzzle_input(file_path: &str) -> impl Iterator<Item = String> {
-    let file: File = File::open(file_path).expect("Couldn't open specified file");
-    let reader = io::BufReader::new(file);
 
-    reader.lines().map(|line| line.expect("Error reading a line"))
-}
 
 #[derive(Debug)]
 pub enum ChallengePart {
@@ -230,53 +225,53 @@ pub enum ChallengePart {
   Two
 }
 
-
 pub struct ChallengeConfig {
   pub is_test: bool,
   pub part: ChallengePart
 }
 
-/*
-  get_challenge_part:
+impl ChallengeConfig {
+  const TEST_INPUT_FILE_PATH: &str = "./src/example_input.txt";
+  const PUZZLE_INPUT_FILE_PATH: &str = "./src/puzzle_input.txt";
 
-  It parses the command line argument to identify which solution of the aoc2024 day challenge should be run.
+  /// Parses the command arguments and returns the current's challenge runtime config.
+  /// The default configuration is to run challenge's part one with the puzzle input. 
+  /// For the other configurations there are the following arguments:
+  ///   -2, --two: for running the second part of the challenge.
+  ///   -t, --test: for using the test input.
+  pub fn get() -> Self {
+    let is_test = env::args().any(|arg| ["-t", "--test"].contains(&arg.as_str()));
+
+    let part = if env::args().any(|arg| ["-2", "--two"].contains(&arg.as_str())) {
+      ChallengePart::Two
+    } else {
+      ChallengePart::One
+    };
+
+    println!("------ Running part: {:?}; Using: {} input -------", part, if is_test { "test" } else { "puzzle" } );
   
-  defaultst to "one" if no argument is provided
- */
-pub fn get_challenge_config() -> ChallengeConfig {
-  // get the second command-line argument (first is the program name)
-  let first_argument = env::args().nth(1).unwrap_or("one".to_string());
-
-  let mut challenge_part: ChallengePart = ChallengePart::One; 
-  let mut test = false;
-
-  // Match input to the corresponding enum variant
-  match first_argument.as_str() {
-    "two" => { 
-      challenge_part = ChallengePart::Two;
-      let second_argument = env::args().nth(2).unwrap_or("".to_string());
-      match second_argument.as_str() {
-        "-t" | "--test" => { test = true },
-        _ => (),
-      }
-    },
-    "-t" | "--test" => { 
-      test = true 
-    },
-    "one" => {  
-      let second_argument = env::args().nth(2).unwrap_or("".to_string());
-      match second_argument.as_str() {
-        "-t" | "--test" => { test = true },
-        _ => (),
-      }
-    },
-    _ => (),
+    Self { is_test, part }
   }
 
-  println!("------ Running part: {:?}; Using: {} input -------", challenge_part, if test { "test" } else { "puzzle" } );
+  /// Returns an iterator on the input files.
+  /// If no file path is specified it uses the challenge config's defaults.
+  pub fn read_puzzle_input(&self, file_path: Option<&str>) -> impl Iterator<Item = String> {
+    let default_file_path = if self.is_test { 
+      Self::TEST_INPUT_FILE_PATH 
+    } else { 
+      Self::PUZZLE_INPUT_FILE_PATH 
+    };
+    
+    let file_path = file_path.unwrap_or(default_file_path);
+    
+    let file: File = File::open(file_path).expect(format!("Couldn't open {file_path}").as_str());
+    let reader = io::BufReader::new(file);
 
-  ChallengeConfig {
-    is_test: test,
-    part: challenge_part
+    reader.lines().map(|line| line.expect("Error reading a line"))
   }
 }
+
+pub const TEST_CONFIG: ChallengeConfig = ChallengeConfig {
+  is_test: true,
+  part: ChallengePart::One,
+};
