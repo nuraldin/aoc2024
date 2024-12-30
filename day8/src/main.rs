@@ -15,7 +15,7 @@
 use utils::{ChallengeConfig, read_puzzle_input, ChallengeConfig, ChallengePart, Coordinate};
 
 fn main() {
-  let challenge_config = ChallengeConfig::get(();
+  let challenge_config = ChallengeConfig::get();
   let puzzle = parse_input(&challenge_config);
 
   // println!("Puzzle shape: {:?}", puzzle);

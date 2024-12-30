@@ -14,12 +14,12 @@
  It is needed to calculate the similarity score which tis the number of the left column times the times it appears on the right.
  All added together for each element of the left list.
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
-    let challenge_config = ChallengeConfig::get(();
+    let challenge_config = ChallengeConfig::get();
 
-    let (mut column1, mut column2) = parse_puzzle_input(challenge_config.is_test);
+    let (mut column1, mut column2) = parse_puzzle_input(&challenge_config);
 
     match challenge_config.part {
       ChallengePart::One => println!("Locations distance: {:?}", calculate_distance(&mut column1, &mut column2)),
@@ -27,13 +27,11 @@ fn main() {
     }
 }
 
-fn parse_puzzle_input(is_test: bool) -> (Vec<i32>, Vec<i32>) {
+fn parse_puzzle_input(config: &ChallengeConfig) -> (Vec<i32>, Vec<i32>) {
   let mut column1: Vec<i32> = Vec::new();
   let mut column2: Vec<i32> = Vec::new();
 
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
-
-  for line in read_puzzle_input(file_path) {
+  for line in config.read_puzzle_input(None) {
       let columns: Vec<&str> = line.split_whitespace().collect();
 
       if columns.len() >= 2 {

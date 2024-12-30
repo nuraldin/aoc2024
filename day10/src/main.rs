@@ -17,7 +17,7 @@
 use utils::{ChallengeConfig, read_puzzle_input, ChallengeConfig, ChallengePart, Coordinate, Direction};
 
 fn main() {
-    let challenge_config = ChallengeConfig::get(();
+    let challenge_config = ChallengeConfig::get();
     
     let topographic_map = parse_input(&challenge_config);
 

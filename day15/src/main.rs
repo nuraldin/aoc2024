@@ -38,7 +38,7 @@ struct Coordinate {
 }
 
 fn main() {
-    let challenge_config = ChallengeConfig::get(();
+    let challenge_config = ChallengeConfig::get();
 
     let (robot, puzzle_map, instructions) = parse_puzzle_input(challenge_config.is_test);
     

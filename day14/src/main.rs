@@ -31,7 +31,7 @@ use regex::Regex;
 use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 
 fn main() {
-    let challenge_config = ChallengeConfig::get(();
+    let challenge_config = ChallengeConfig::get();
     
     let robot_list = parse_robot_list(challenge_config.is_test);
     // println!("robot_list: {robot_list:?}");

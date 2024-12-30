@@ -18,7 +18,7 @@ use std::collections::{HashMap, HashSet};
 use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 
 fn main() {
-    let challenge_config = ChallengeConfig::get(();
+    let challenge_config = ChallengeConfig::get();
 
     let mut network_map = parse_input(challenge_config.is_test);
 

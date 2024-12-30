@@ -8,7 +8,7 @@
 use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
-    let challenge_config = ChallengeConfig::get(();
+    let challenge_config = ChallengeConfig::get();
     
     match challenge_config.part {
       ChallengePart::One => println!("Not implemented yet"),

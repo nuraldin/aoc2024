@@ -28,7 +28,7 @@ use std::collections::{HashMap,HashSet};
 use utils::{ChallengeConfig, read_puzzle_input, ChallengePart, Coordinate, Direction };
 
 fn main() {
-  let challenge_config = ChallengeConfig::get(();
+  let challenge_config = ChallengeConfig::get();
 
   let (police_position, puzzle_map) = parse_input(challenge_config.is_test);
   // println!("puzzle: {:?}", puzzle);

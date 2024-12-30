@@ -25,7 +25,7 @@ use std::{collections::HashMap, thread};
 use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 
 fn main() {
-    let challenge_config = ChallengeConfig::get(();
+    let challenge_config = ChallengeConfig::get();
     
     let stones = get_stones(challenge_config.is_test);
     // println!("Stone arrangement: {:?}", stones);

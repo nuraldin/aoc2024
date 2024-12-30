@@ -191,7 +191,7 @@ fn parse_input(is_test: bool) -> SystemConfig {
 }
 
 fn main() {
-    let challenge_config = ChallengeConfig::get(();
+    let challenge_config = ChallengeConfig::get();
 
     let mut system_config = parse_input(challenge_config.is_test);
 

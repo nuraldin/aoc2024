@@ -25,7 +25,7 @@ use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 use regex::Regex;
 
 fn main() {
-    let challenge_config = ChallengeConfig::get(();
+    let challenge_config = ChallengeConfig::get();
     
     let parsed_input = parse_input(challenge_config.is_test);
 

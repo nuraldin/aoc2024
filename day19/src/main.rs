@@ -60,7 +60,7 @@ fn possible_designs(ds: Vec<String>, ps: &Vec<String>) -> i32 {
   let mut possible_designs = 0;
 
   for d in ds {
-    if is_design_possible(d, &ps) {
+    if is_design_possible(d, &ps, 0) {
       possible_designs += 1;
     }
   }
@@ -68,24 +68,61 @@ fn possible_designs(ds: Vec<String>, ps: &Vec<String>) -> i32 {
   possible_designs
 }
 
-fn is_design_possible(d: String, ps: &Vec<String>) -> bool {
-  println!("d: {}, ps: {:?}", d, ps);
+fn is_design_possible_bfs(d: String, ps: &Vec<String>, depth: i32) -> bool {
+  // get all possible patterns that could be used in the string
+  let ps: Vec<String> = ps.iter().filter(|p| d.contains(*p)).cloned().collect();
+  println!("design: {}, possible patterns: {:?}, depth: {}", d, ps, depth);
 
-  if d.len() == 0 {
+  // From all the possible, get the ones that would start the string
+  let possible_patterns: Vec<String> = ps.iter().filter(|p| d.starts_with(*p)).cloned().collect();
+  let mut combinations: Vec<String> = vec![];
+  println!("possible patterns: {possible_patterns:?}");
+
+  // Get the remaining string depending on what was already taken away
+  for (idx, pattern ) in possible_patterns.iter().enumerate() {
+    println!("testing pattern {idx}: {pattern}");
+    if let Some(next_pattern) = d.strip_prefix(pattern) {
+      combinations.push(next_pattern.to_string());
+    } 
+  }
+
+  // if there are no possible patterns and any of the combinations has length zero, it succeeded on forming the design
+  if combinations.len() == 0 {
     return true;
   }
 
-  if !ps.iter().any(|ps| d.starts_with(ps)) {
+  for combination in combinations {
+    
+  }
+
+  false
+}
+
+fn is_design_possible(d: String, ps: &Vec<String>, depth: i32) -> bool {
+  let ps: Vec<String> = ps.iter().filter(|p| d.contains(*p)).cloned().collect();
+  println!("design: {}, possible patterns: {:?}, depth: {}", d, ps, depth);
+
+  // if there is no more string to tokenize, the design is possible
+  if d.len() == 0 {
+    println!("There is no more string to tokenize");
+    return true;
+  }
+
+  // if no pattern is possible, short circuit to false
+  if ps.len() == 0 || !ps.iter().any(|ps| d.starts_with(ps)) {
+    println!("There is no more patterns to try");
     return false;
   }
 
   let possible_patterns: Vec<String> = ps.iter().filter(|p| d.starts_with(*p)).cloned().collect();
-  for pattern in possible_patterns {
-    let next_pattern = d.clone().strip_prefix(&pattern).unwrap().to_string();
-
-    if is_design_possible(next_pattern, ps) {
-      return true;
-    }
+  println!("possible patterns: {possible_patterns:?}");
+  for (idx, pattern ) in possible_patterns.iter().enumerate() {
+    println!("testing pattern {idx}: {pattern}");
+    if let Some(next_pattern) = d.strip_prefix(pattern) {
+      if is_design_possible(next_pattern.to_string(), &ps, depth + 1) {
+        return true;
+      }
+    } 
   }
 
   false
@@ -102,7 +139,7 @@ use super::*;
     let design = "brwrr".to_string();
     let patterns: Vec<String> = ["r", "wr", "b", "g", "bwu", "rb", "gb", "br"].iter().map(|p| p.to_string()).collect();
     
-    assert!(is_design_possible(design, &patterns))
+    assert!(is_design_possible(design, &patterns, 0))
   }
 
   #[test]
@@ -110,7 +147,7 @@ use super::*;
     let design = "ubwu".to_string();
     let patterns: Vec<String> = ["r", "wr", "b", "g", "bwu", "rb", "gb", "br"].iter().map(|p| p.to_string()).collect();
    
-    assert!(!is_design_possible(design, &patterns))
+    assert!(!is_design_possible(design, &patterns, 0))
   }
 
   #[test]

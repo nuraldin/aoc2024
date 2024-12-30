@@ -12,13 +12,14 @@
  Similar to the first but now there are do() and don't() instructions that enable or disables future mul instructions.
  they all start `enabled`
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 use regex::Regex;
 
-fn main() {
-  let challenge_config = ChallengeConfig::get((); 
+use utils::{ChallengeConfig, ChallengePart};
 
-  let memory_line = get_memory_line(challenge_config.is_test);
+fn main() {
+  let challenge_config = ChallengeConfig::get(); 
+
+  let memory_line = get_memory_line(&challenge_config);
 
   match challenge_config.part {
     ChallengePart::One => println!("The non corrupted multiplications add up to: {:?}", part_one(memory_line)),
@@ -26,14 +27,8 @@ fn main() {
   }
 }
 
-fn get_memory_line(is_test: bool) -> String {
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
-
-  for line in read_puzzle_input(file_path) {
-    return line;
-  }  
-
-  unreachable!();
+fn get_memory_line(config: &ChallengeConfig) -> String {
+  config.read_puzzle_input(None).collect::<Vec<String>>()[0].clone()
 }
 
 fn part_one(line: String) -> u32 {
