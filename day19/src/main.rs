@@ -91,11 +91,9 @@ fn is_design_possible_bfs(d: String, ps: &Vec<String>, depth: i32) -> bool {
     return true;
   }
 
-  for combination in combinations {
-    
-  }
+  combinations.iter();
 
-  false
+  true
 }
 
 fn is_design_possible(d: String, ps: &Vec<String>, depth: i32) -> bool {

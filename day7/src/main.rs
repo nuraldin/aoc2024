@@ -25,12 +25,12 @@
 
 */
 use std::collections::HashMap;
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
   let challenge_config = ChallengeConfig::get();
 
-  let puzzle = parse_input(challenge_config.is_test);
+  let puzzle = parse_input(&challenge_config);
   // println!("Puzzle shape: {:?}", puzzle);
 
   match challenge_config.part {
@@ -39,12 +39,10 @@ fn main() {
   }
 }
 
-fn parse_input(is_test: bool) -> HashMap<u64, Vec<u64>> {
+fn parse_input(config: &ChallengeConfig) -> HashMap<u64, Vec<u64>> {
   let mut equations_map = HashMap::new();  
 
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
-  
-  for line in read_puzzle_input(file_path) {
+  for line in config.read_puzzle_input(None) {
     let result: Vec<&str> = line.split(':').collect();
 
     equations_map.insert(

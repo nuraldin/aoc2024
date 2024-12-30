@@ -12,7 +12,7 @@
  The antinodes can happen also in positions of other antennas and infinitely
 
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengeConfig, ChallengePart, Coordinate};
+use utils::{ChallengeConfig, ChallengePart, Coordinate};
 
 fn main() {
   let challenge_config = ChallengeConfig::get();
@@ -48,7 +48,7 @@ fn parse_input(config: &ChallengeConfig) -> Puzzle {
   let mut map_size: i32 = 0;
   let mut antennas = Vec::new();
 
-  for (row_idx, line) in read_puzzle_input(if config.is_test {"./src/example_input.txt"} else { "./src/puzzle_input.txt" }).enumerate() {
+  for (row_idx, line) in config.read_puzzle_input(None).enumerate() {
     if map_size == 0 {
       map_size = line.len() as i32;
     }

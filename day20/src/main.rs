@@ -18,13 +18,14 @@
  How many cheats would save me at least 100 picoseconds?
 
 */
-use utils::{ChallengeConfig, print_coordinate_map, read_puzzle_input, ChallengePart, Coordinate, Direction, TopographicMap};
 use std::collections::HashSet;
+
+use utils::{ChallengeConfig, print_coordinate_map, ChallengePart, Coordinate, Direction, TopographicMap };
 
 fn main() {
     let challenge_config = ChallengeConfig::get();
 
-    let race_map = parse_input(challenge_config.is_test);
+    let race_map = parse_input(&challenge_config);
     // print_coordinate_map(&race_map);
 
     match challenge_config.part {
@@ -33,12 +34,11 @@ fn main() {
     }
 }
 
-fn parse_input(is_test: bool) -> TopographicMap<char> {
+fn parse_input(config: &ChallengeConfig) -> TopographicMap<char> {
   let mut map = TopographicMap::new();
 
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
   
-  for (row_idx, line) in read_puzzle_input(file_path).enumerate() {
+  for (row_idx, line) in config.read_puzzle_input(None).enumerate() {
     for (col_idx, c) in line.chars().enumerate() {
       map.insert(
         Coordinate::new(row_idx as i32, col_idx as i32),
@@ -58,7 +58,7 @@ fn run_track(puzzle_map: &TopographicMap<char>) -> i32 {
   let mut picoseconds = 0;
   
   while *puzzle_map.get(&curr_pos).unwrap() != 'E' {
-    for direction in Direction::to_vec() {
+    for direction in Direction::iter() {
       let next_pos = curr_pos.add_delta(&direction);
       match  puzzle_map.get(&next_pos) {
         Some(value) => {
@@ -88,7 +88,7 @@ fn track_path(puzzle_map: &TopographicMap<char>) -> Vec<Coordinate> {
   path.push(curr_pos.clone());
 
   while *puzzle_map.get(&curr_pos).unwrap() != 'E' {
-    for direction in Direction::to_vec() {
+    for direction in Direction::iter() {
       let next_pos = curr_pos.add_delta(&direction);
       match  puzzle_map.get(&next_pos) {
         Some(value) => {
@@ -206,7 +206,7 @@ fn find_cheats_atleast(race_map: &TopographicMap<char>, duration: i32) -> i32 {
 fn possible_cheats(pos: Coordinate, map: &TopographicMap<char>) -> Vec<Coordinate> {
   let mut possible_cheats = Vec::new();
 
-  for direction in Direction::to_vec() {
+  for direction in Direction::iter() {
     let mut next_pos = pos.add_delta(&direction);
     if let Some(value) = map.get(&next_pos) {
       if *value == '#' {
@@ -230,7 +230,7 @@ fn possible_cheats_recursive(pos: Coordinate, map: &TopographicMap<char>, remain
   }
 
   let mut next = vec![];
-  for direction in Direction::to_vec() {
+  for direction in Direction::iter() {
     let prev_pos = pos.add_delta(&direction);
 
     if let Some(value) = map.get(&prev_pos) {
@@ -256,10 +256,10 @@ fn possible_cheats_recursive(pos: Coordinate, map: &TopographicMap<char>, remain
   }
 
   for next_pos in next {
-    possible_cheats_recursive(pos, map, remaining_secs - 2, possible_cheats)
+    possible_cheats_recursive(pos, map, remaining_secs - 2, possible_cheats);
   }
 
-  return possible.cheats
+  return possible_cheats
 }
 
 fn possible_cheats_upto(pos: Coordinate, map: &TopographicMap<char>, secs: i32) -> HashSet<Coordinate> {
@@ -273,30 +273,32 @@ fn possible_cheats_upto(pos: Coordinate, map: &TopographicMap<char>, secs: i32) 
 mod tests {
   use super::*;
 
+  use utils::TEST_CONFIG;
+
   #[test]
   fn start_position_is_right() {
-    let puzzle_map = parse_input(true);
+    let puzzle_map = parse_input(&TEST_CONFIG);
     
     assert_eq!(find_in_map(&puzzle_map, 'S').unwrap(), Coordinate::new(3, 1));
   }
 
   #[test]
   fn finish_position_is_right() {
-    let puzzle_map = parse_input(true);
+    let puzzle_map = parse_input(&TEST_CONFIG);
     
     assert_eq!(find_in_map(&puzzle_map, 'E').unwrap(), Coordinate::new(7, 5));
   }
 
   #[test] 
   fn example_racetrack_finishes_in_84_picoseconds() {
-    let puzzle_map = parse_input(true);
+    let puzzle_map = parse_input(&TEST_CONFIG);
 
     assert_eq!(run_track(&puzzle_map), 84);
   }
 
   #[test]
   fn test_example_2_picoseconds_cheats() {
-    let puzzle_map = parse_input(true);
+    let puzzle_map = parse_input(&TEST_CONFIG);
     
     assert_eq!(find_cheats(&puzzle_map, 2), 14, "There should be 14 cheats that save 2 picoseconds");
     assert_eq!(find_cheats(&puzzle_map, 4), 14, "There should be 14 cheats that save 4 picoseconds");
@@ -313,14 +315,14 @@ mod tests {
 
   #[test]
   fn test_example_atleast_cheats() {
-    let puzzle_map = parse_input(true);
+    let puzzle_map = parse_input(&TEST_CONFIG);
     
     assert_eq!(find_cheats_atleast(&puzzle_map, 20), 5, "There should be at least 5 cheats that save 20 picoseconds");
   }
 
   #[test]
   fn test_example_20_picoseconds_cheats() {
-    let puzzle_map = parse_input(true);
+    let puzzle_map = parse_input(&TEST_CONFIG);
     
     assert_eq!(find_cheats_upto(&puzzle_map, 50, 20), 32, "There should be 32 cheats that save 50 picoseconds");
     assert_eq!(find_cheats_upto(&puzzle_map, 52, 20), 31, "There should be 31 cheats that save 52 picoseconds");

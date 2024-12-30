@@ -28,12 +28,12 @@ use regex::Regex;
 
  In general, the idea is to calculate using modulus arithmetic the possition after n secodns of the robots and multiply the robots of each quadrant. That worked initially but my heuristic for finding the christmas tree didn't.n
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
     let challenge_config = ChallengeConfig::get();
     
-    let robot_list = parse_robot_list(challenge_config.is_test);
+    let robot_list = parse_robot_list(&challenge_config);
     // println!("robot_list: {robot_list:?}");
 
     let seconds = 7000; // Change this to test other seconds
@@ -48,12 +48,11 @@ fn main() {
     }
 }
 
-fn parse_robot_list(is_test: bool) -> Vec<Robot> {
+fn parse_robot_list(config: &ChallengeConfig) -> Vec<Robot> {
   let mut robot_list = vec![];
   let list_regex = Regex::new(r"p=(\d+),(\d+) v=(-?\d+),(-?\d+)").unwrap();
 
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
-  for line in read_puzzle_input(file_path) {
+  for line in config.read_puzzle_input(None) {
     let captured = list_regex.captures(&line).unwrap();
     
     robot_list.push(Robot {

@@ -13,12 +13,12 @@ use std::fs::read;
 
  Part two:
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
   let challenge_config = ChallengeConfig::get();
 
-  let (keys, locks) = parse_input(challenge_config.is_test);
+  let (keys, locks) = parse_input(&challenge_config);
   // println!("keys: {:?} locks: {:?}", keys, locks);
 
   match challenge_config.part {
@@ -29,13 +29,12 @@ fn main() {
 
 type Combination = [i32; 5];
 
-fn parse_input(is_test: bool) -> (Vec<Combination>, Vec<Combination>) {
+fn parse_input(config: &ChallengeConfig) -> (Vec<Combination>, Vec<Combination>) {
   let mut keys = vec![];
   let mut locks = vec![];
 
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
 
-  let lines: Vec<String> = read_puzzle_input(file_path).collect(); 
+  let lines: Vec<String> = config.read_puzzle_input(None).collect(); 
 
   let mut i = 0;
   while i < lines.len() {

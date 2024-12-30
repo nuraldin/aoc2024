@@ -14,7 +14,7 @@
 
  Part two:
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, ChallengePart};
 
 use std::collections::HashMap;
 
@@ -150,17 +150,17 @@ impl SystemConfig {
   }
 }
 
-fn parse_input(is_test: bool) -> SystemConfig {
+fn parse_input(config: &ChallengeConfig) -> SystemConfig {
   let mut system_config = SystemConfig::new();
 
-  let (gates_file, inputs_file) = if is_test { 
+  let (gates_file, inputs_file) = if config.is_test { 
     ("./src/example_gates.txt", "./src/example_inputs.txt") 
   } else {
     ("./src/puzzle_gates.txt", "./src/puzzle_inputs.txt")
   };
 
   // get inputs starting configuration
-  for inputs_line in read_puzzle_input(inputs_file) {
+  for inputs_line in config.read_puzzle_input(Some(inputs_file)) {
     let parsed_line: Vec<&str> = inputs_line.split(": ").collect();
 
     let wire_label = parsed_line[0].to_string();
@@ -170,7 +170,7 @@ fn parse_input(is_test: bool) -> SystemConfig {
   }
 
   // get gates configuration 
-  for gates_line in read_puzzle_input(gates_file) {
+  for gates_line in config.read_puzzle_input(Some(gates_file)) {
     let parsed_line: Vec<&str> = gates_line.split(" ").collect();
 
     let input_a= parsed_line[0].to_string();
@@ -193,7 +193,7 @@ fn parse_input(is_test: bool) -> SystemConfig {
 fn main() {
     let challenge_config = ChallengeConfig::get();
 
-    let mut system_config = parse_input(challenge_config.is_test);
+    let mut system_config = parse_input(&challenge_config);
 
     match challenge_config.part {
       ChallengePart::One => {

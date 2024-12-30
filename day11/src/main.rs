@@ -22,12 +22,12 @@
 */
 use std::{collections::HashMap, thread};
 
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
     let challenge_config = ChallengeConfig::get();
     
-    let stones = get_stones(challenge_config.is_test);
+    let stones = get_stones(&challenge_config);
     // println!("Stone arrangement: {:?}", stones);
 
     match challenge_config.part {
@@ -36,12 +36,10 @@ fn main() {
     }
 }
 
-fn get_stones(is_test: bool) -> Vec<usize> {
+fn get_stones(config: &ChallengeConfig) -> Vec<usize> {
   let mut stones = Vec::new();
 
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
-
-  for line in read_puzzle_input(file_path) {
+  for line in config.read_puzzle_input(None) {
     let arrangement: Vec<&str> = line.split(' ').collect(); 
 
     for stone in arrangement {

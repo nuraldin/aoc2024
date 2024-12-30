@@ -15,12 +15,13 @@
 
 */
 use std::collections::{HashMap, HashSet};
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+
+use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
     let challenge_config = ChallengeConfig::get();
 
-    let mut network_map = parse_input(challenge_config.is_test);
+    let mut network_map = parse_input(&challenge_config);
 
     let networks = find_connections(&mut network_map);
 
@@ -32,12 +33,11 @@ fn main() {
 
 // Parse the input to get the computers and each connection
 // This will be a map of computers to a set of network including itself. Helpful for later intersecting sets.
-fn parse_input(is_test: bool) -> Vec<(String, HashSet<String>)> {
+fn parse_input(config: &ChallengeConfig) -> Vec<(String, HashSet<String>)> {
   let mut network_map: HashMap<String, HashSet<String>> = HashMap::new();
 
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
 
-  for line in read_puzzle_input(file_path) {
+  for line in config.read_puzzle_input(None) {
     let computers: Vec<&str> = line.split("-").collect();
 
     let left_computer = computers[0].to_string();
@@ -117,9 +117,11 @@ fn find_connections(computers: &mut Vec<(String, HashSet<String>)>) -> Vec<HashS
 mod tests {
   use super::*;
 
+  use utils::TEST_CONFIG;
+
   #[test]
   fn number_of_three_interconnected_computers_in_example() {
-    let mut puzzle_map = parse_input(true);
+    let mut puzzle_map = parse_input(&TEST_CONFIG);
 
     let three_interconnected_computers = find_connections(&mut puzzle_map);
 
@@ -128,7 +130,7 @@ mod tests {
 
   #[test]
   fn number_of_three_interconnected_computers_in_example_that_have_a_computer_starting_with_t() {
-    let mut puzzle_map = parse_input(true);
+    let mut puzzle_map = parse_input(&TEST_CONFIG);
 
     let three_interconnected_computers = find_connections(&mut puzzle_map);
     let starting_with_t = find_connections_with_computers_starting_with(three_interconnected_computers, 't');

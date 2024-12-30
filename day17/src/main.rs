@@ -45,12 +45,12 @@
 */
 use std::collections::HashMap;
 use regex::Regex;
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
     let challenge_config = ChallengeConfig::get();
     
-    let mut computer = parse_input(challenge_config.is_test);
+    let mut computer = parse_input(&challenge_config);
     println!("{computer:?}");
 
     match challenge_config.part {
@@ -259,13 +259,12 @@ impl Computer {
     }
 }
 
-fn parse_input(is_test: bool) -> Computer  {
+fn parse_input(config: &ChallengeConfig) -> Computer  {
   let mut computer = Computer::new();
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
   let register_pattern = Regex::new(r"Register A: (\d+)Register B: (\d+)Register C: (\d+)").unwrap();
   let program_pattern = Regex::new(r"Program:\s([\d,]+)").unwrap();
   
-  let lines: Vec<String> = read_puzzle_input(&file_path).collect();
+  let lines: Vec<String> = config.read_puzzle_input(None).collect();
   let file = lines.concat();
 
   let register_captures = register_pattern.captures(&file).unwrap();

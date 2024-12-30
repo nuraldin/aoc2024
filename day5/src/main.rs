@@ -24,13 +24,14 @@
  If any number is not in the after set, i.e. that number should be after another one, it can be placed in one index.
  After applying that algorithm it worked excellently and refactored the whole solutions. 
 */
-use std::{collections::{HashMap,HashSet}, vec};
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+use std::collections::{HashMap,HashSet};
+
+use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
   let challenge_config = ChallengeConfig::get();
 
-  let (page_ordering_rules, page_updates_list) = parse_input(challenge_config.is_test);
+  let (page_ordering_rules, page_updates_list) = parse_input(&challenge_config);
 
   let mut page_updates: Vec<Vec<u32>> = Vec::new();
   match challenge_config.part {
@@ -79,22 +80,22 @@ struct OrderingSets {
   after: HashSet<u32>
 } 
 
-fn parse_input(is_test: bool) -> (HashMap<u32, OrderingSets>, Vec<Vec<u32>>) {
+fn parse_input(config: &ChallengeConfig) -> (HashMap<u32, OrderingSets>, Vec<Vec<u32>>) {
   let mut page_rules = HashMap::new();
   let mut page_updates_list: Vec<Vec<u32>> = Vec::new();
   
-  let (updates_file_path, rules_file_path) = if is_test {
+  let (updates_file_path, rules_file_path) = if config.is_test {
     ("./src/example_pages.txt", "./src/example_page_ordering_rules.txt")
   } else {
     ("./src/puzzle_pages.txt", "./src/puzzle_page_ordering_rules.txt")
   };
 
-  for line in read_puzzle_input(updates_file_path) {
+  for line in config.read_puzzle_input(Some(updates_file_path)) {
     let pages_line: Vec<u32> = line.split(",").map(|s| s.parse().unwrap()).collect();
     page_updates_list.push(pages_line)
   }
 
-  for line in read_puzzle_input(rules_file_path) {
+  for line in config.read_puzzle_input(Some(rules_file_path)) {
     let page_rules_line: Vec<u32> = line.split("|").map(|s| s.parse().unwrap()).collect();
     
     let before_page = page_rules_line[0];

@@ -12,13 +12,14 @@
  We need to search this time X-MAS, i.e. the word MAS in a shape of an X.
  It can also be backwards like SAM
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
 use regex::Regex;
+
+use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
   let challenge_config = ChallengeConfig::get();
 
-  let puzzle = parse_puzzle(challenge_config.is_test);
+  let puzzle = parse_puzzle(&challenge_config);
 
   let mut words = 0;
   
@@ -40,12 +41,10 @@ fn main() {
   println!("The amount of XMAS in the puzzle is: {:?}", words);
 }
 
-fn parse_puzzle(is_test: bool) -> Vec<Vec<char>> {
+fn parse_puzzle(config: &ChallengeConfig) -> Vec<Vec<char>> {
   let mut puzzle: Vec<Vec<char>> = Vec::new();
 
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
-
-  for line in read_puzzle_input(file_path) {
+  for line in config.read_puzzle_input(None) {
     let mut puzzle_line: Vec<char> = Vec::new();
     
     for letter in line.chars() {

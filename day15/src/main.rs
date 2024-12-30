@@ -29,7 +29,7 @@ use std::{collections::HashMap, vec};
 
 
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, ChallengePart};
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 struct Coordinate {
@@ -40,7 +40,7 @@ struct Coordinate {
 fn main() {
     let challenge_config = ChallengeConfig::get();
 
-    let (robot, puzzle_map, instructions) = parse_puzzle_input(challenge_config.is_test);
+    let (robot, puzzle_map, instructions) = parse_puzzle_input(&challenge_config);
     
     match challenge_config.part {
       ChallengePart::One => println!("Sum of all final GPS coordinates: {:?}", sum_gps_coordinates(robot, puzzle_map, instructions)),
@@ -48,19 +48,19 @@ fn main() {
     }
 }
 
-fn parse_puzzle_input(is_test: bool) -> (Coordinate, HashMap<Coordinate, char>, Vec<char>) {
+fn parse_puzzle_input(config: &ChallengeConfig) -> (Coordinate, HashMap<Coordinate, char>, Vec<char>) {
   let mut instructions: Vec<char> = vec![];
   let mut puzzle_map: HashMap<Coordinate, char> = HashMap::new();
   let mut robot = Coordinate { x: 0, y: 0};
 
-  let (map, directions) = if is_test { 
+  let (map, directions) = if config.is_test { 
     ("./src/example_map.txt", "./src/example_robot_directions.txt") 
   } else { 
     ("./src/puzzle_map.txt", "./src/puzzle_robot_directions.txt") 
   };
 
   // parse boxes map
-  for (row_idx, row) in read_puzzle_input(map).enumerate() {
+  for (row_idx, row) in config.read_puzzle_input(Some(map)).enumerate() {
     for (col_idx, location) in row.chars().enumerate() {
       let coordinate = Coordinate {
         x: row_idx as i32,
@@ -77,7 +77,7 @@ fn parse_puzzle_input(is_test: bool) -> (Coordinate, HashMap<Coordinate, char>, 
   }
 
   // parse robot direction instructions map
-  for line in read_puzzle_input(&directions) {
+  for line in config.read_puzzle_input(Some(&directions)) {
     for direction in line.chars() {
       instructions.push(direction);
     }
@@ -149,23 +149,5 @@ fn calculate_final_coordinates(robot: &mut Coordinate, puzzle_map: &mut HashMap<
         *robot = next_robot_coordinate;
       }
     }
-  }
-}
-
-fn print_current_location(puzzle_map: &mut HashMap<Coordinate, char>) {
-  for x in 0..30 {
-    let mut row: Vec<String> = vec![];
-
-    for y in 0..30 {
-      let coordinate = Coordinate { x, y };
-      if let Some(value) = puzzle_map.get(&coordinate).cloned() {
-        let item = format!("{value}");
-        row.push(item);
-      } else {
-        row.push(".".to_string());
-      }
-    }
-
-    println!("{}", row.concat());
   }
 }

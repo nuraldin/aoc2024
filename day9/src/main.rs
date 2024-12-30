@@ -13,12 +13,12 @@
 
  similar to part one but now the files should be moved completely to the nearest free slot otherwise they are not moved
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, ChallengePart};
 
 fn main() {
     let challenge_config = ChallengeConfig::get();
     
-    let puzzle = parse_input(challenge_config.is_test);
+    let puzzle = parse_input(&challenge_config);
 
     match challenge_config.part {
       ChallengePart::One => println!("filesystem checksum: {:?}", filesystem_checksum(puzzle)),
@@ -26,11 +26,10 @@ fn main() {
     }
 }
 
-fn parse_input(is_test: bool) -> String {
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
-
+fn parse_input(config: &ChallengeConfig) -> String {
   let mut disk_map = String::new();
-  for line in read_puzzle_input(file_path) {
+  
+  for line in config.read_puzzle_input(None) {
     disk_map = line;
   }
 

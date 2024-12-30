@@ -27,12 +27,12 @@
  It is not performant specially because I'm trying to merge regions every time I check for an item and that is costly.
 
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart, Coordinate, Direction, TopographicMap};
+use utils::{ChallengeConfig, ChallengePart, Coordinate, Direction, TopographicMap};
 
 fn main() {
     let challenge_config = ChallengeConfig::get();
 
-    let puzzle_map = parse_plots(challenge_config.is_test);
+    let puzzle_map = parse_plots(&challenge_config);
 
     let regions = get_regions(puzzle_map);
     // println!("regions: {:?}", regions);
@@ -43,12 +43,10 @@ fn main() {
     }
 }
 
-fn parse_plots(is_test: bool) -> TopographicMap<char> {
+fn parse_plots(config: &ChallengeConfig) -> TopographicMap<char> {
   let mut plot_map = TopographicMap::new();
 
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
-
-  for (x, plots) in read_puzzle_input(file_path).enumerate() {
+  for (x, plots) in config.read_puzzle_input(None).enumerate() {
     for (y, plant) in plots.chars().enumerate() {
       plot_map.insert(Coordinate { x: x as i32, y: y as i32 }, plant);
     }
@@ -99,7 +97,7 @@ impl Region {
   }
 
   fn is_adjacent(&self, coordinate: &Coordinate) -> bool {
-    for direction in Direction::to_vec() {
+    for direction in Direction::iter() {
       let next = coordinate.add_delta(&direction);
 
       if self.plots.contains(&next) {

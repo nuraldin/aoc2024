@@ -25,12 +25,13 @@
  The correct, but brute force, solution is to check every next position for loops but starting from the police starting position. 
 */
 use std::collections::{HashMap,HashSet};
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart, Coordinate, Direction };
+
+use utils::{ChallengeConfig, ChallengePart, Coordinate, Direction };
 
 fn main() {
   let challenge_config = ChallengeConfig::get();
 
-  let (police_position, puzzle_map) = parse_input(challenge_config.is_test);
+  let (police_position, puzzle_map) = parse_input(&challenge_config);
   // println!("puzzle: {:?}", puzzle);
 
   match challenge_config.part {
@@ -39,13 +40,11 @@ fn main() {
   }
 }
 
-fn parse_input(is_test: bool) -> (Coordinate, HashMap<Coordinate, char>) {
+fn parse_input(config: &ChallengeConfig) -> (Coordinate, HashMap<Coordinate, char>) {
   let mut puzzle_map = HashMap::new();
   let mut police_start_coordinate = Coordinate { x: 0, y: 0 };
 
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
-
-  for (row_idx, row) in read_puzzle_input(file_path).enumerate() {
+  for (row_idx, row) in config.read_puzzle_input(None).enumerate() {
     for (col_idx, item) in row.chars().enumerate() {
       let coordinate = Coordinate { x: row_idx as i32, y: col_idx as i32 };
       if item == '^' {
@@ -64,7 +63,7 @@ fn calculate_obstructions(mut police_position: Coordinate, mut puzzle_map: HashM
 
   let initial_police_position = police_position.clone();
   let initial_police_direction = police_direction.clone();
-  let mut possible_position = police_direction.add_delta(&police_position);
+  let mut possible_position = police_position.add_delta(&police_direction);
   while let Some(item) = puzzle_map.get(&possible_position) {
     if *item == '#' {
       police_direction = police_direction.rotate_right();
@@ -79,7 +78,7 @@ fn calculate_obstructions(mut police_position: Coordinate, mut puzzle_map: HashM
       police_position = possible_position.clone();
     }
     
-    possible_position = police_direction.add_delta(&police_position);
+    possible_position = police_position.add_delta(&police_direction);
   }
 
   // print_map(&puzzle_map);
@@ -92,7 +91,7 @@ fn loops(obstacle: Coordinate,mut police_position: Coordinate, mut police_direct
   // police_direction = police_direction.rotate_right(); 
   let mut visited_positions: HashSet<(Coordinate, Direction)> = HashSet::from([(police_position.clone(), police_direction.clone())]);
   
-  let mut possible_position = police_direction.add_delta(&police_position);
+  let mut possible_position = police_position.add_delta(&police_direction);
   while let Some(item) = puzzle_map.get(&possible_position) {
     //println!("next possible positon: {possible_position:?} direction: {police_direction:?} item: {item} visited positions: {visited_positions:?}");
     if *item == '#' {
@@ -109,7 +108,7 @@ fn loops(obstacle: Coordinate,mut police_position: Coordinate, mut police_direct
     }
 
     // println!("visited_positions: {visited_positions:?}");
-    possible_position = police_direction.add_delta(&police_position);
+    possible_position = police_position.add_delta(&police_direction);
   }
 
   false
@@ -119,7 +118,7 @@ fn calculate_positions(mut police_position: Coordinate, mut puzzle_map: HashMap<
   let mut police_direction = Direction::Up;
   let mut visited_positions: HashSet<Coordinate> = HashSet::from([police_position.clone()]);
 
-  let mut possible_position = police_direction.add_delta(&police_position);
+  let mut possible_position = police_position.add_delta(&police_direction);
   while let Some(item) = puzzle_map.get(&possible_position) {
     if *item == '#' {
       police_direction = police_direction.rotate_right();
@@ -128,7 +127,7 @@ fn calculate_positions(mut police_position: Coordinate, mut puzzle_map: HashMap<
       visited_positions.insert(police_position.clone());
     }
     
-    possible_position = police_direction.add_delta(&police_position);
+    possible_position = police_position.add_delta(&police_direction);
   }
 
   visited_positions.len()

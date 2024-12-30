@@ -2,7 +2,12 @@ use std::env;
 use std::fs::File;
 use std::io::{self, BufRead};
 
-pub mod topography;
+mod topography;
+
+pub use topography::coordinate::Coordinate;
+pub use topography::direction::Direction;
+pub use topography::map::*;
+
 
 #[derive(Debug)]
 pub enum ChallengePart {

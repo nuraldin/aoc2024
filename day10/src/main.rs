@@ -14,7 +14,7 @@
  now the result is the number of distinct hiking trails which begin at a certain trailhead.
  aka doesn't mattter if it arrives to hte same 9, just how many ways it has to reach to 9s
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengeConfig, ChallengePart, Coordinate, Direction};
+use utils::{ChallengeConfig, ChallengePart, Coordinate, Direction};
 
 fn main() {
     let challenge_config = ChallengeConfig::get();
@@ -32,7 +32,7 @@ type TopographicMap = Vec<Vec<char>>;
 fn parse_input(config: &ChallengeConfig) -> TopographicMap {
   let mut topographic_map = Vec::new();
 
-  for line in read_puzzle_input(if config.is_test {"./src/example_input.txt"} else { "./src/puzzle_input.txt" }) {
+  for line in config.read_puzzle_input(None) {
     topographic_map.push(line.chars().collect())
   }
 
@@ -118,8 +118,8 @@ fn get_next_possible_locations(location: &Coordinate, topographic_map: &Topograp
   let max_x = topographic_map.len() as i32;
   let max_y = topographic_map[0].len() as i32;
 
-  for direction in Direction::to_vec() {
-    let next_location = location.add_delta(direction);
+  for direction in Direction::iter() {
+    let next_location = location.add_delta(&direction);
     if location.is_outside_boundaries((max_x, max_y)) && !is_wall(&next_location, topographic_map) && is_evenly_higher(&next_location, location, topographic_map) {
       next_locations.push(next_location)
     }

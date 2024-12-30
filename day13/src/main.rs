@@ -21,13 +21,13 @@
  For this challenge I used linear programming to solve for one of the tokens variables. Even though I started trying to brute force by checking each button a and b token combination that satisfied the equation.
  I then restorted to the math approach for part tow as it wouldn't have scaled previous algorithm.
 */
-use utils::{ChallengeConfig, read_puzzle_input, ChallengePart};
+use utils::{ChallengeConfig, ChallengePart};
 use regex::Regex;
 
 fn main() {
     let challenge_config = ChallengeConfig::get();
     
-    let parsed_input = parse_input(challenge_config.is_test);
+    let parsed_input = parse_input(&challenge_config);
 
     match challenge_config.part {
       ChallengePart::One => println!("The minimum tokens needed to get any of the prizes is: {}", calculate_minimum_tokens(parsed_input, 0)),
@@ -53,17 +53,16 @@ struct ClawMachineConfig {
   button_config: ButtonConfig,
 }
 
-fn parse_input(is_test: bool) -> Vec<ClawMachineConfig> {
+fn parse_input(config: &ChallengeConfig) -> Vec<ClawMachineConfig> {
   let mut claw_machine_configs = Vec::new();
   
-  let file_path = if is_test { "./src/example_input.txt" } else { "./src/puzzle_input.txt" };
 
   let button_a_pattern = Regex::new(r"Button A: X\+(\d+), Y\+(\d+)").unwrap();
   let button_b_pattern = Regex::new(r"Button B: X\+(\d+), Y\+(\d+)").unwrap();
   let prize_pattern = Regex::new(r"Prize: X=(\d+), Y=(\d+)").unwrap();
 
   let mut lines = Vec::new();
-  for line in read_puzzle_input(file_path) {
+  for line in config.read_puzzle_input(None) {
     if line.starts_with("Prize") {
       lines.push(line);
       let claw_machine_config_string: String = lines.join(" ");
